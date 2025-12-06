@@ -28,7 +28,7 @@ def _save_uploaded_file(uploaded_file) -> Path:
 
 def main():
     # Logo
-    logo_path = Path(__file__).parent.parent / "docs" / "assets" / "pytab_logo.png"
+    logo_path = Path(__file__).parent.parent / "docs" / "assets" / "Logo_PyTab.jpg"
     if logo_path.exists():
         st.image(str(logo_path), width=320)
 

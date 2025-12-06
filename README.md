@@ -2,6 +2,16 @@
   <img src="docs/assets/Logo_Pytab.jpg" alt="PyTab logo" width="360">
 </p>
 
+
+
+<p align="center">
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg" alt="License: MIT">
+  </a>
+  <img src="https://img.shields.io/badge/status-alpha-blue.svg" alt="Status: Alpha">
+  <img src="https://img.shields.io/badge/built_with-Streamlit-red.svg" alt="Built with Streamlit">
+</p>
+
 # PyTab
 
 Análises estatísticas rápidas, acessíveis e open-source.

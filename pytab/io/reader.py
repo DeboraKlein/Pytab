@@ -10,16 +10,35 @@ Funções principais:
 """
 
 import os
+from pathlib import Path
+from typing import Union, Optional
+
 import pandas as pd
 
+PathLike = Union[str, os.PathLike]
 
-def read_csv_smart(path: str) -> pd.DataFrame:
-    """
-    Leitura robusta de CSV, testando separadores e encodings comuns.
-    """
 
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Arquivo não encontrado: {path}")
+def _ensure_exists(path: PathLike) -> str:
+    """
+    Garante que o arquivo existe e devolve o caminho como string.
+    """
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Arquivo não encontrado: {p}")
+    return str(p)
+
+
+def read_csv_smart(path: PathLike) -> pd.DataFrame:
+    """
+    Leitura robusta de CSV/TXT, testando separadores e encodings comuns.
+
+    Tenta combinações de:
+      - separadores: ',', ';', '\\t'
+      - encodings: 'utf-8', 'latin-1'
+
+    Lança ValueError se todas as tentativas falharem.
+    """
+    path_str = _ensure_exists(path)
 
     attempts = [
         {"sep": ",", "encoding": "utf-8"},
@@ -30,51 +49,77 @@ def read_csv_smart(path: str) -> pd.DataFrame:
         {"sep": "\t", "encoding": "latin-1"},
     ]
 
-    last_error = None
+    last_error: Optional[Exception] = None
 
     for cfg in attempts:
         try:
             df = pd.read_csv(
-                path,
+                path_str,
                 sep=cfg["sep"],
                 encoding=cfg["encoding"],
-                engine="python"
+                engine="python",     # evitar problemas com low_memory e separador
             )
-            if df.shape[1] > 0:  # Verifica se carregou alguma coluna
+            # Se carregou pelo menos 1 coluna, consideramos válido
+            if df.shape[1] > 0:
                 return df
         except Exception as e:
             last_error = e
             continue
 
-
     raise ValueError(f"Falha ao ler CSV. Último erro: {last_error}")
 
 
-def read_excel_smart(path: str) -> pd.DataFrame:
+def read_excel_smart(
+    path: PathLike,
+    sheet_name: Union[int, str, None] = 0,
+) -> pd.DataFrame:
     """
-    Leitura de arquivos Excel (.xlsx) usando o engine openpyxl.
+    Leitura simples de arquivos Excel (.xlsx, .xlsm).
+
+    Parâmetros:
+      - path: caminho do arquivo
+      - sheet_name:
+          0 (default) -> primeira aba
+          nome da aba -> 'Planilha1', etc.
+          None -> tenta ler todas as abas (retorna dict de DataFrames)
+
+    Observação:
+      É necessário ter 'openpyxl' instalado para ler .xlsx com pandas.
+      Se der erro de engine, instale com:
+
+          pip install openpyxl
     """
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Arquivo não encontrado: {path}")
+    path_str = _ensure_exists(path)
 
-    return pd.read_excel(path, engine="openpyxl")
+    try:
+        df = pd.read_excel(path_str, sheet_name=sheet_name)
+        return df
+    except ImportError as e:
+        raise ImportError(
+            "Falha ao ler Excel. Verifique se o pacote 'openpyxl' está instalado "
+            "(ex: pip install openpyxl)."
+        ) from e
+    except Exception as e:
+        raise ValueError(f"Falha ao ler Excel: {e}") from e
 
 
-def read_any(path: str) -> pd.DataFrame:
+def read_any(path: PathLike) -> pd.DataFrame:
     """
-    Função de alto nível para ler qualquer arquivo suportado.
+    Leitor genérico que escolhe a função correta com base na extensão.
 
     Suportado:
-    - .csv
-    - .txt
-    - .xlsx
+      - .csv
+      - .txt
+      - .xlsx
+      - .xlsm
     """
-    ext = os.path.splitext(path)[1].lower()
+    path_str = _ensure_exists(path)
+    ext = Path(path_str).suffix.lower()
 
     if ext in [".csv", ".txt"]:
-        return read_csv_smart(path)
+        return read_csv_smart(path_str)
 
-    if ext in [".xlsx"]:
-        return read_excel_smart(path)
+    if ext in [".xlsx", ".xlsm"]:
+        return read_excel_smart(path_str)
 
     raise ValueError(f"Formato de arquivo não suportado: {ext}")
