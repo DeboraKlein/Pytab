@@ -181,22 +181,22 @@ Documentação técnica detalhada está em `docs/`.
 
 ## 6. Instalação e uso
 
-Clonar o repositório:
-
+### Clonar o repositório
+```bash
 git clone https://github.com/DeboraKlein/Pytab
-
 cd PyTab
+```
 
 
-Instalação em modo desenvolvimento:
-
+### Instalação em modo desenvolvimento:
+```bash
 pip install -e .
+```
 
-
-Executar o aplicativo:
-
+### Executar o aplicativo:
+```bash
 streamlit run pytab_app/streamlit_app.py
-
+```
 
 ---
 
