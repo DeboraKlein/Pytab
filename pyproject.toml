@@ -1,9 +1,13 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "pytab"
 version = "0.1.0"
 description = "Open-source statistical toolkit inspired by Minitab."
 authors = [
-    { name="Debora Rebula" }
+    { name = "Debora Rebula" }
 ]
 readme = "README.md"
 requires-python = ">=3.9"
@@ -16,6 +20,6 @@ dependencies = [
     "matplotlib",
 ]
 
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+[tool.setuptools]
+# Diz explicitamente: só empacote o módulo 'pytab'
+packages = ["pytab"]
