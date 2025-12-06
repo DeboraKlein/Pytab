@@ -38,14 +38,14 @@ def read_csv_smart(path: str) -> pd.DataFrame:
                 path,
                 sep=cfg["sep"],
                 encoding=cfg["encoding"],
-                low_memory=False,
-                engine="python",
+                engine="python"
             )
             if df.shape[1] > 0:  # Verifica se carregou alguma coluna
                 return df
         except Exception as e:
             last_error = e
             continue
+
 
     raise ValueError(f"Falha ao ler CSV. Último erro: {last_error}")
 

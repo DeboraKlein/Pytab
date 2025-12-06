@@ -1,0 +1,10 @@
+LICENSE.md
+README.md
+pyproject.toml
+pytab/__init__.py
+pytab.egg-info/PKG-INFO
+pytab.egg-info/SOURCES.txt
+pytab.egg-info/dependency_links.txt
+pytab.egg-info/requires.txt
+pytab.egg-info/top_level.txt
+tests/test_reader.py
