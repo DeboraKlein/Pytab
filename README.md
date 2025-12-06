@@ -2,128 +2,104 @@
   <img src="docs/assets/pytab_logo.png" alt="PyTab logo" width="360">
 </p>
 
-# PyTab  
+# PyTab
+
 Análises estatísticas rápidas, acessíveis e open-source.
 
 ---
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)]()
-[![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow.svg)]()
-[![Streamlit](https://img.shields.io/badge/Interface-Streamlit-red.svg)]()
+## Visão Geral
 
-PyTab é uma ferramenta estatística desenvolvida em Python para análise rápida de dados, identificação de outliers, gráficos de controle (SPC) e geração de relatórios automáticos.  
-Inspirado na simplicidade de softwares como o Minitab, o PyTab oferece uma alternativa moderna, open-source e acessível para análises estatísticas essenciais.
+**PyTab** é um toolkit estatístico inspirado no Minitab, projetado para oferecer análises confiáveis e acessíveis para profissionais de **dados**, **qualidade**, **Lean Six Sigma** e **gestão de processos**.
 
----
+O foco é entregar:
 
-## 1. Objetivo do PyTab
+- leitura robusta de dados reais (inclusive CSVs problemáticos)
+- métodos estatísticos fundamentais
+- ferramentas de análise exploratória
+- integração natural com Python e Streamlit
+- geração futura de relatórios automáticos (PDF)
 
-Ferramentas estatísticas tradicionais são poderosas, porém:
-
-- possuem alto custo de licença  
-- não integram facilmente com pipelines modernos  
-- são fechadas e pouco transparentes  
-- não são acessíveis a estudantes, equipes públicas ou pequenos negócios  
-
-O PyTab nasce para ser:
-
-- open-source  
-- automatizável  
-- transparente  
-- fácil de usar  
-- aplicável em qualquer área (saúde, finanças, qualidade, compras públicas, operações, etc.)
+O PyTab nasce como alternativa aberta e extensível a ferramentas proprietárias.
 
 ---
 
-## 2. Para quem é o PyTab?
+## Para quem é o PyTab?
 
-### Usuários finais
+O PyTab é voltado para profissionais que precisam de análises rápidas, práticas e auditáveis:
 
-- profissionais Lean Six Sigma  
-- analistas de qualidade  
-- engenheiros de processos  
-- gestores e consultores  
-- estudantes  
-
-O PyTab oferece:
-
-- upload de dados  
-- estatísticas automáticas  
-- gráficos clássicos (histograma, boxplot, Pareto)  
-- SPC (XmR)  
-- relatórios em PDF  
-
-Tudo via Streamlit, **sem necessidade de programar**.
+- Analistas de Dados  
+- Cientistas de Dados  
+- Engenheiros de Qualidade  
+- Green Belts / Black Belts  
+- Gestores de Processos  
+- Pesquisadores  
+- Estudantes  
 
 ---
 
-### Desenvolvedores e equipes técnicas
+## Lean Six Sigma (LSS) + Estatística
 
-A biblioteca interna é modular e reutilizável:
+PyTab implementa gradualmente os métodos mais usados em LSS:
 
-- `pytab.io` – leitura robusta de CSV/Excel  
-- `pytab.stats` – cálculos estatísticos  
-- `pytab.charts` – construção de gráficos  
-- `pytab.reports` – relatórios automáticos  
-- `pytab_app` – interface em Streamlit  
+- Estatística descritiva  
+- Estimativa de variabilidade  
+- Z-score e detecção de outliers  
+- Histogramas e boxplots  
+- Gráficos de controle (SPC)  
+- Análises exploratórias de causa  
 
-Ideal para automações, pipelines de dados e notebooks.
-
----
-
-## 3. Lean Six Sigma e o papel do PyTab
-
-Lean Six Sigma é uma metodologia baseada em dados e estatística para:
-
-- reduzir variabilidade  
-- eliminar desperdícios  
-- analisar estabilidade de processos  
-- controlar desempenho  
-
-O PyTab facilita especialmente as etapas DMAIC:
-
-### Measure  
-- estatísticas descritivas  
-- entendimento inicial do processo  
-
-### Analyze  
-- outliers  
-- variabilidade  
-- Pareto  
-- distribuição  
-- gráficos de controle  
-
-### Control  
-- SPC  
-- relatórios automáticos  
+O objetivo é permitir que times pratiquem DMAIC com ferramentas modernas e open-source.
 
 ---
 
-## 4. Funcionalidades (atual e planejadas)
+## Funcionalidades Atuais (v0.1.0)
 
-### Versão 0.1.0
+### ✔ Leitura robusta de dados  
+- Tolerante a separadores inconsistentes  
+- Tolerante a encodings diferentes  
+- Detecção automática de formato  
+- Suporte a CSV e, em breve, Excel  
 
-- leitura inteligente de CSV/Excel  
-- detecção automática de tipos de dados  
-- estatísticas descritivas  
-- prévia dos dados no app  
+### ✔ Estatísticas descritivas  
+- Média, mediana, mínimo, máximo  
+- Desvio padrão  
+- Contagem e valores faltantes  
+- Tabela padronizada para DataFrames  
 
-### Próximas versões
+### ✔ Aplicativo Streamlit  
+- Upload de arquivos  
+- Visualização de prévia  
+- Estatísticas básicas instantâneas  
 
-- histograma e boxplot  
-- cálculo de z-score e outliers  
-- Pareto  
-- SPC (XmR)  
-- relatórios PDF (executivo + técnico)  
-- análise temporal automática  
-
-Roadmap completo:  
- **[ROADMAP.md](ROADMAP.md)**
+### ✔ Estrutura modular da biblioteca  
+- `io/` — carregamento de dados  
+- `stats/` — funções estatísticas  
+- `charts/` — geração de gráficos  
+- `reports/` — exportação e relatórios  
+- `utils/` — funções auxiliares  
 
 ---
 
-## 5. Arquitetura do PyTab
+## Roadmap
+
+Veja o planejamento completo em:  
+[`ROADMAP.md`](ROADMAP.md)
+
+Próximas entregas incluem:
+
+- Z-score e outliers avançados  
+- Histogramas automáticos  
+- Gráficos de controle (XmR)  
+- Relatórios PDF automáticos  
+- Interface Streamlit completa  
+- Publicação no PyPI  
+
+---
+
+## Arquitetura do Projeto
+
+
 
 O projeto segue um modelo modular, separando claramente responsabilidades:
 
@@ -168,7 +144,7 @@ PyTab/
 │
 ├── README.md
 ├── ROADMAP.md
-├── LICENSE
+├── LICENSE.md
 ├── pyproject.toml
 └── .gitignore
 
@@ -212,8 +188,10 @@ Contribuições são bem-vindas.
 
 ## 8. Licença
 
-PyTab é distribuído sob licença MIT.  
-Você é livre para usar, modificar e distribuir esta ferramenta, desde que mantenha o aviso de copyright.
+PyTab é distribuído sob a licença MIT License, permitindo uso, modificação e distribuição livre.
+
+Consulte o arquivo `LICENSE.md`
+ para detalhes.
 
 
 
