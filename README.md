@@ -2,10 +2,6 @@
   <img src="docs/assets/pytab_logo.png" alt="PyTab logo" width="360">
 </p>
 
-<p align="center">
-  <strong>Open Statistical Toolkit</strong>
-</p>
-
 # PyTab  
 Análises estatísticas rápidas, acessíveis e open-source.
 
