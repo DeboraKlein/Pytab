@@ -55,24 +55,24 @@ O objetivo é permitir que times pratiquem DMAIC com ferramentas modernas e open
 
 ## Funcionalidades Atuais (v0.1.0)
 
-### ✔ Leitura robusta de dados  
+###  Leitura robusta de dados  
 - Tolerante a separadores inconsistentes  
 - Tolerante a encodings diferentes  
 - Detecção automática de formato  
 - Suporte a CSV e, em breve, Excel  
 
-### ✔ Estatísticas descritivas  
+###  Estatísticas descritivas  
 - Média, mediana, mínimo, máximo  
 - Desvio padrão  
 - Contagem e valores faltantes  
 - Tabela padronizada para DataFrames  
 
-### ✔ Aplicativo Streamlit  
+###  Aplicativo Streamlit  
 - Upload de arquivos  
 - Visualização de prévia  
 - Estatísticas básicas instantâneas  
 
-### ✔ Estrutura modular da biblioteca  
+###  Estrutura modular da biblioteca  
 - `io/` — carregamento de dados  
 - `stats/` — funções estatísticas  
 - `charts/` — geração de gráficos  
