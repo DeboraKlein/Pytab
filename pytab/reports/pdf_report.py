@@ -22,7 +22,7 @@ def create_simple_report(path: str, title: str = "PyTab Report"):
     c = canvas.Canvas(path, pagesize=A4)
 
     # caminho do logo relativo a este arquivo
-    logo_path = Path(__file__).parent.parent.parent / "docs" / "assets" / "pytab_logo.png"
+    logo_path = Path(__file__).parent.parent.parent / "docs" / "assets" / "Logo_PyTab.jpg"
 
     # desenha o logo no topo
     if logo_path.exists():
