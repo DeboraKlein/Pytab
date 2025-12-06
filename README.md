@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="docs/assets/pytab_logo.png" alt="PyTab logo" width="320">
+</p>
+
+# PyTab  
+Análises estatísticas rápidas, acessíveis e open-source.
+
+
 # PyTab  
 Análises estatísticas rápidas, acessíveis e open-source.
 

@@ -1,17 +1,21 @@
 # pytab_app/streamlit_app.py
 
+from pathlib import Path
 import streamlit as st
-import pandas as pd
 
 from pytab.io.reader import read_any
 from pytab.stats.descriptive import summarize_numeric
 
-def main():
-    st.title("PyTab – Análise Estatística Rápida")
 
-    st.markdown(
-        "Carregue um arquivo CSV ou Excel e o PyTab fará uma análise estatística básica."
-    )
+def main():
+    # Caminho do logo relativo a este arquivo
+    logo_path = Path(__file__).parent.parent / "docs" / "assets" / "pytab_logo.png"
+
+    st.image(str(logo_path), width=250)
+    st.title("PyTab – Open Statistical Toolkit")
+    st.markdown("Análises estatísticas rápidas para Lean Six Sigma, qualidade e dados em geral.")
+    ...
+
 
     uploaded_file = st.file_uploader("Selecione um arquivo (.csv, .txt, .xlsx)", type=["csv", "txt", "xlsx"])
 
