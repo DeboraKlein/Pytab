@@ -1,13 +1,15 @@
 <p align="center">
-  <img src="docs/assets/pytab_logo.png" alt="PyTab logo" width="320">
+  <img src="docs/assets/pytab_logo.png" alt="PyTab logo" width="360">
+</p>
+
+<p align="center">
+  <strong>Open Statistical Toolkit</strong>
 </p>
 
 # PyTab  
 Análises estatísticas rápidas, acessíveis e open-source.
 
-
-# PyTab  
-Análises estatísticas rápidas, acessíveis e open-source.
+---
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)]()
