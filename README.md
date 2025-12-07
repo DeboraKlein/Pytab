@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Pytab_logo_H.svg" alt="PyTab logo" width="360">
+  <img src="Pytab_logo.svg" alt="PyTab logo" width="360">
 </p>
 
 
