@@ -1,12 +1,13 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
-from pytab.theme import apply_theme
+from pytab.theme import apply_pytab_theme
 
-apply_theme()
+apply_pytab_theme()
 
 PRIMARY = "#1f77b4"
 SECONDARY = "#ec7f00"
+
 
 
 def fase_analisar(df: pd.DataFrame):

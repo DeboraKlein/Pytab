@@ -3,7 +3,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 
-from pytab.charts.theme import apply_pytab_style
+from pytab.theme import apply_pytab_theme
 from pytab.utils.app_utils import (
     load_dataframe,
     check_column_names,
@@ -37,7 +37,7 @@ para apoiar a construção do *baseline* do problema.
 
 
 def main() -> None:
-    apply_pytab_style()
+    apply_pytab_theme()
 
     st.set_page_config(
         page_title="PyTab - Open Statistical Toolkit",
