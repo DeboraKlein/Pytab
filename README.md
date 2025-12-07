@@ -1,7 +1,4 @@
-<p align="center">
-  <img src="Pytab_logo_H_menor.svg" alt="PyTab logo" width="360">
-</p>
-
+logo_path = Path(__file__).parent.parent / "docs" / "assets" / "Pytab_logo.svg"
 
 
 <p align="center">
