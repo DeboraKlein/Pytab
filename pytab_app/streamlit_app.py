@@ -313,7 +313,8 @@ Aqui avaliamos **como o processo se comporta hoje**:
         df_time = df_time.sort_values(data_col)
 
         if not df_time.empty:
-            n_points = df_time.shape[0]
+            # Em vez de contar linhas, contamos quantos dias únicos existem
+            n_points = df_time[data_col].dt.date.nunique()
             suggested_freq = _suggest_time_freq(n_points)
             freq_map = _freq_options()
             reverse_map = {v: k for k, v in freq_map.items()}
