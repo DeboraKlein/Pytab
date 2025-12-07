@@ -44,7 +44,7 @@ def main() -> None:
         layout="wide",
     )
 
-    logo_path = Path(__file__).parent.parent / "docs" / "assets" / "pytab_logo.png"
+    logo_path = Path(__file__).parent.parent / "docs" / "assets" / "Pytab_logo.svg"
 
     with st.sidebar:
         if logo_path.exists():
