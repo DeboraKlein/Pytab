@@ -1,4 +1,6 @@
-logo_path = Path(__file__).parent.parent / "docs" / "assets" / "Pytab_logo.svg"
+<p align="center">
+  <img src="Pytab_logo_H.svg" alt="PyTab Logo" width="400">
+</p>
 
 
 <p align="center">
