@@ -114,28 +114,29 @@ Próximas entregas incluem:
 O projeto segue um modelo modular, separando claramente responsabilidades:
 
 ````
-PyTab/
-├── pytab/
-│   ├── __init__.py
-│   ├── io/
-│   │   ├── __init__.py
-│   │   └── reader.py
-│   ├── stats/
-│   │   ├── __init__.py
-│   │   └── descriptive.py
-│   ├── charts/
-│   │   ├── __init__.py
-│   │   └── control_chart.py
-│   ├── reports/
-│   │   ├── __init__.py
-│   │   └── pdf_report.py
-│   └── utils/
-│       ├── __init__.py
-│       └── schema.py
+Pytab/
+├─ pytab/
+│  ├─ __init__.py
+│  ├─ io/
+│  │  └─ reader.py
+│  ├─ stats/
+│  │  ├─ descriptive.py
+│  │  └─ outliers.py
+│  ├─ utils/
+│  │  └─ schema.py
+│  └─ charts/
+│     └─ theme.py          
 │
-├── pytab_app/
-│   ├── __init__.py
-│   └── streamlit_app.py
+├─ pytab_app/
+│  ├─ __init__.py          
+│  ├─ utils.py             
+│  ├─ fases/
+│  │  ├─ __init__.py       
+│  │  ├─ medir.py          
+│  │  ├─ analisar.py       
+│  │  ├─ melhorar.py      
+│  │  └─ controlar.py      
+│  └─ streamlit_app.py     
 │
 ├── docs/
 │   ├── architecture.md

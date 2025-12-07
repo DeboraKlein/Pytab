@@ -4,7 +4,12 @@ import streamlit as st
 import pandas as pd
 
 from pytab.charts.theme import apply_pytab_style
-from pytab_app.utils import load_dataframe, check_column_names, detect_types, show_column_warnings
+from pytab.utils.app_utils import (
+    load_dataframe,
+    check_column_names,
+    detect_types,
+    show_column_warnings
+)
 from pytab_app.fases.medir import fase_medir
 from pytab_app.fases.analisar import fase_analisar
 from pytab_app.fases.melhorar import fase_melhorar
