@@ -28,7 +28,7 @@ from pytab_app.modules.outliers import render_outliers_section
 # Função principal da fase MEDIR
 # ------------------------------------------------------------
 def fase_medir(df: pd.DataFrame):
-    st.header("📏 Fase Medir — Estatísticas e Comportamento do Indicador")
+    st.header(" Fase Medir — Estatísticas e Comportamento do Indicador")
 
     # 1) Colunas numéricas disponíveis
     numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
@@ -54,7 +54,7 @@ def fase_medir(df: pd.DataFrame):
     st.markdown(f"**Coluna de data identificada:** `{date_col}`")
 
     # 3) Configurações de agregação temporal
-    st.subheader("⚙️ Configurações da série temporal")
+    st.subheader(" Configurações da série temporal")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -83,14 +83,14 @@ def fase_medir(df: pd.DataFrame):
 
     # 5) Prévia dos dados agregados
     if mostrar_preview:
-        st.markdown("### 🔎 Prévia da série temporal agregada")
+        st.markdown("###  Prévia da série temporal agregada")
         st.dataframe(
             serie.to_frame(name=indicador).head(),
             use_container_width=True,
         )
 
     # 6) Cartões de estatísticas descritivas
-    st.subheader("📊 Estatísticas descritivas")
+    st.subheader(" Estatísticas descritivas")
     mostrar_stats_cards(serie, indicador)
 
     # 7) Gráfico de tendência + narrativa automática
