@@ -1,1 +1,2 @@
-# Torna pytab_app.fases um subpacote.
+# Permite importar módulos das fases do DMAIC
+

@@ -1,6 +1,4 @@
-<p align="center">
-  <img src=docs/assets/Pytab_logo_H.svg alt="PyTab Logo" width="400">
-</p>
+
 
 ---
 name: Bug report
