@@ -1,1 +1,1 @@
-# __init__.py fase analisar
+from .analisar import fase_analisar

@@ -1,1 +1,1 @@
-# __init__.py fase medir
+from .medir import fase_medir
