@@ -10,3 +10,4 @@ venv/
 *.xlsx
 .DS_Store
 .streamlit/
+.egg-info/  

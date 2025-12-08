@@ -7,24 +7,25 @@ def apply_pytab_theme():
     plt.style.use("default")
 
     plt.rcParams.update({
-        # cores PyTab
+        # Cores PyTab
         "axes.prop_cycle": plt.cycler(color=[PRIMARY_BLUE, SECONDARY_ORANGE]),
 
-        # sem fundo branco
+        # Fundo limpo e compatível com Streamlit
+        "figure.facecolor": "white",     # <— ALTERAÇÃO IMPORTANTE
         "axes.facecolor": "none",
-        "figure.facecolor": "none",
 
-        # eixos limpos
+        # Eixos limpos
         "axes.edgecolor": "#333333",
         "axes.labelcolor": "#333333",
         "xtick.color": "#333333",
         "ytick.color": "#333333",
 
-        # grid removido
+        # Grid removido
         "axes.grid": False,
         "grid.color": "none",
 
-        # texto legível
+        # Texto legível
         "font.size": 11,
     })
+
 
