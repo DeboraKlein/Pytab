@@ -1,7 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import pandas as pd
-from pytab.theme import apply_pytab_theme
+from pytab.charts.theme import apply_pytab_theme
 
 apply_pytab_theme()
 

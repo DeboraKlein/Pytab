@@ -3,7 +3,7 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 
-from pytab.theme import apply_pytab_theme
+from pytab.charts.theme import apply_pytab_theme
 from pytab.utils.app_utils import (
     load_dataframe,
     check_column_names,
@@ -109,9 +109,9 @@ def main() -> None:
     if fase == "Definir":
         _fase_definir()
     elif fase == "Medir":
-        fase_medir(df, types)
+        fase_medir(df)
     elif fase == "Analisar":
-        fase_analisar(df, types)
+        fase_analisar(df)
     elif fase == "Melhorar":
         fase_melhorar(df, types)
     elif fase == "Controlar":
