@@ -175,9 +175,17 @@ def plot_trend(
         margin=dict(l=40, r=20, t=60, b=60),
     )
 
-    # Eixos sem grid visual
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
+    fig.update_xaxes(
+    showgrid=False,
+    tickfont=dict(color=TEXT_COLOR, size=11),
+    title_font=dict(color=TEXT_COLOR, size=12),
+    )
+    fig.update_yaxes(
+        showgrid=False,
+        tickfont=dict(color=TEXT_COLOR, size=11),
+        title_font=dict(color=TEXT_COLOR, size=12),
+    )
+
 
     return fig
 

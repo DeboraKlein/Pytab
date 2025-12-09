@@ -103,8 +103,17 @@ def _build_scatter_time(
         margin=dict(l=40, r=20, t=60, b=40),
     )
 
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
+    fig.update_xaxes(
+    showgrid=False,
+    tickfont=dict(color=TEXT_COLOR, size=11),
+    title_font=dict(color=TEXT_COLOR, size=12),
+    )
+    fig.update_yaxes(
+        showgrid=False,
+        tickfont=dict(color=TEXT_COLOR, size=11),
+        title_font=dict(color=TEXT_COLOR, size=12),
+    )
+
 
     return fig
 

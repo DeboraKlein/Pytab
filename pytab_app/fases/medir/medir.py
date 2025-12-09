@@ -92,7 +92,8 @@ def fase_medir(df: pd.DataFrame):
 
     # 6) Cartões de estatísticas descritivas
     st.subheader(" Estatísticas descritivas")
-    mostrar_stats_cards(serie, indicador)
+    mostrar_stats_cards(df, indicador)
+
 
     # 7) Gráfico de tendência + narrativa automática
     render_trend_section(serie, indicador)
