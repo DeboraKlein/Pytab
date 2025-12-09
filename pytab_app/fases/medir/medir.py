@@ -21,7 +21,8 @@ from pytab_app.modules.aggregation import (
 )
 from pytab_app.fases.medir.stats_cards import mostrar_stats_cards
 from pytab_app.modules.trend_plot import render_trend_section
-from pytab_app.modules.outliers import render_outliers_section
+from pytab_app.fases.medir.visoes import render_outliers_section
+
 
 
 # ------------------------------------------------------------
@@ -97,5 +98,5 @@ def fase_medir(df: pd.DataFrame):
     render_trend_section(serie, indicador)
 
     # 8) Outliers (boxplot, série, tabela, narrativa)
-    render_outliers_section(serie, indicador)
+    render_outliers_section(df, indicador, date_col)
 

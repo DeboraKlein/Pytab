@@ -1,197 +1,178 @@
 # ============================================================
-# PyTab - Módulo de Detecção e Visualização de Outliers
+# PyTab - Módulo de Outliers (backend, sem Streamlit)
 # ============================================================
-# Inclui:
-# - Cálculo por Z-score
-# - Boxplot com destaque
-# - Scatter temporal com outliers em evidência
-# - Tabela de outliers
-# - Narrativa automática
+# Métodos suportados:
+#  - Z-score
+#  - IQR (Interquartile Range)
+#  - MAD (Median Absolute Deviation)
+#  - Modo automático: escolhe o melhor método com base nos dados
 # ============================================================
 
 from __future__ import annotations
 
-import pandas as pd
 import numpy as np
-import plotly.graph_objs as go
-import streamlit as st
+import pandas as pd
+from typing import Literal, Tuple, Dict, Any
 
-PRIMARY_BLUE = "#1f77b4"
-SECONDARY_ORANGE = "#ec7f00"
-TEXT_COLOR = "#333333"
-BG_COLOR = "#f5f5f5"
-OUTLIER_RED = "#d62728"
+OutlierMethod = Literal["zscore", "iqr", "mad"]
 
 
 # ------------------------------------------------------------
-# Função principal de detecção
+# Funções de detecção específicas
 # ------------------------------------------------------------
-def detectar_outliers(series: pd.Series, z_limite: float = 2.5) -> pd.DataFrame:
-    """
-    Retorna DataFrame com:
-    valor, zscore, é_outlier
-    """
-
-    media = series.mean()
-    std = series.std()
+def _detect_zscore(series: pd.Series, z_lim: float = 2.5) -> pd.DataFrame:
+    s = series.astype(float)
+    mean = s.mean()
+    std = s.std(ddof=1)
 
     if std == 0 or np.isnan(std):
-        return pd.DataFrame({
-            "valor": series,
-            "zscore": np.nan,
-            "outlier": False,
-        })
-
-    zscores = (series - media) / std
-    outliers = zscores.abs() > z_limite
-
-    return pd.DataFrame({
-        "valor": series,
-        "zscore": zscores,
-        "outlier": outliers,
-    })
-
-
-# ------------------------------------------------------------
-# Boxplot com Plotly
-# ------------------------------------------------------------
-def plot_boxplot(series: pd.Series, results: pd.DataFrame, indicador: str):
-    fig = go.Figure()
-
-    fig.add_trace(go.Box(
-        y=series,
-        name=indicador,
-        marker_color=PRIMARY_BLUE,
-        boxpoints=False
-    ))
-
-    # Pontos de outliers (caso existam)
-    out_data = results[results["outlier"]]
-
-    if not out_data.empty:
-        fig.add_trace(go.Scatter(
-            x=["Outliers"] * len(out_data),
-            y=out_data["valor"],
-            mode="markers",
-            name="Outliers",
-            marker=dict(color=OUTLIER_RED, size=8),
-        ))
-
-    fig.update_layout(
-        title=f"Boxplot — {indicador}",
-        paper_bgcolor=BG_COLOR,
-        plot_bgcolor=BG_COLOR,
-        font=dict(color=TEXT_COLOR, size=11),
-        margin=dict(l=40, r=20, t=60, b=40)
-    )
-
-    fig.update_yaxes(showgrid=False)
-    fig.update_xaxes(showgrid=False)
-
-    return fig
-
-
-# ------------------------------------------------------------
-# Scatter temporal com destaque
-# ------------------------------------------------------------
-def plot_temporal_outliers(series: pd.Series, results: pd.DataFrame, indicador: str):
-    fig = go.Figure()
-
-    # Linha normal
-    fig.add_trace(go.Scatter(
-        x=series.index,
-        y=series.values,
-        mode="lines",
-        name="Série",
-        line=dict(color=PRIMARY_BLUE, width=2)
-    ))
-
-    # Pontos de outliers
-    out_data = results[results["outlier"]]
-    if not out_data.empty:
-        fig.add_trace(go.Scatter(
-            x=out_data.index,
-            y=out_data["valor"],
-            mode="markers",
-            name="Outliers",
-            marker=dict(color=OUTLIER_RED, size=8),
-        ))
-
-    fig.update_layout(
-        title=f"Série Temporal com Outliers — {indicador}",
-        paper_bgcolor=BG_COLOR,
-        plot_bgcolor=BG_COLOR,
-        font=dict(color=TEXT_COLOR, size=11),
-        margin=dict(l=40, r=20, t=60, b=40)
-    )
-
-    fig.update_xaxes(showgrid=False)
-    fig.update_yaxes(showgrid=False)
-
-    return fig
-
-
-# ------------------------------------------------------------
-# Narrativa automática
-# ------------------------------------------------------------
-def gerar_narrativa(results: pd.DataFrame) -> str:
-    total = len(results)
-    qtd = results["outlier"].sum()
-
-    if total == 0:
-        return "Não foi possível avaliar outliers (série vazia)."
-
-    pct = qtd / total * 100
-
-    if qtd == 0:
-        return "Nenhum outlier foi detectado. A série é consistente e não apresenta valores extremos significativos."
-
-    msg = f"Foram detectados **{qtd} outliers**, representando **{pct:.1f}%** da série.\n\n"
-
-    # Classificação simples
-    if pct < 2:
-        msg += "A presença de outliers é **muito baixa**, sugerindo que são casos isolados."
-    elif pct < 10:
-        msg += "A presença de outliers é **moderada**, sugerindo possíveis exceções ou anomalias pontuais."
+        z = pd.Series(np.nan, index=s.index)
+        mask = pd.Series(False, index=s.index)
     else:
-        msg += "A presença de outliers é **alta**, indicando variabilidade incomum ou potenciais erros de registro."
+        z = (s - mean) / std
+        mask = z.abs() > z_lim
 
-    return msg
+    return pd.DataFrame(
+        {
+            "valor": s,
+            "score": z,
+            "outlier": mask,
+        },
+        index=s.index,
+    )
+
+
+def _detect_iqr(series: pd.Series, k: float = 1.5) -> pd.DataFrame:
+    s = series.astype(float)
+    q1 = s.quantile(0.25)
+    q3 = s.quantile(0.75)
+    iqr = q3 - q1
+
+    lower = q1 - k * iqr
+    upper = q3 + k * iqr
+
+    mask = (s < lower) | (s > upper)
+
+    # score: o quanto ultrapassou o limite normalizado pelo IQR
+    score = pd.Series(0.0, index=s.index, dtype=float)
+    score[mask & (s > upper)] = (s[mask & (s > upper)] - upper) / (iqr if iqr != 0 else 1)
+    score[mask & (s < lower)] = (lower - s[mask & (s < lower)]) / (iqr if iqr != 0 else 1)
+
+    return pd.DataFrame(
+        {
+            "valor": s,
+            "score": score,
+            "outlier": mask,
+        },
+        index=s.index,
+    )
+
+
+def _detect_mad(series: pd.Series, thresh: float = 3.5) -> pd.DataFrame:
+    s = series.astype(float)
+    median = s.median()
+    abs_dev = (s - median).abs()
+    mad = abs_dev.median()
+
+    if mad == 0 or np.isnan(mad):
+        z_mad = pd.Series(np.nan, index=s.index)
+        mask = pd.Series(False, index=s.index)
+    else:
+        z_mad = 0.6745 * (s - median) / mad
+        mask = z_mad.abs() > thresh
+
+    return pd.DataFrame(
+        {
+            "valor": s,
+            "score": z_mad,
+            "outlier": mask,
+        },
+        index=s.index,
+    )
 
 
 # ------------------------------------------------------------
-# Função integrada para Streamlit
+# Escolha automática de método
 # ------------------------------------------------------------
-def render_outliers_section(series: pd.Series, indicador: str):
-    st.subheader("🔎 Detecção de Outliers")
+def suggest_outlier_method(series: pd.Series) -> Tuple[OutlierMethod, str]:
+    """
+    Sugere o melhor método com base em:
+    - tamanho da amostra
+    - assimetria (skewness)
+    """
 
-    col1, col2 = st.columns(2)
+    s = series.dropna().astype(float)
+    n = len(s)
 
-    with col1:
-        z_lim = st.number_input(
-            "Limite do Z-score",
-            min_value=1.0,
-            max_value=5.0,
-            value=2.5,
-            step=0.1
-        )
+    if n == 0:
+        return "zscore", "Série vazia. Usando Z-score por padrão."
 
-    # Detectar
-    results = detectar_outliers(series, z_lim)
+    if n < 20:
+        return "iqr", "Amostra pequena (< 20 valores). IQR é mais estável nesse caso."
 
-    # Gráficos
-    st.markdown("### Boxplot")
-    fig_box = plot_boxplot(series, results, indicador)
-    st.plotly_chart(fig_box, use_container_width=True)
+    skew = s.skew()
 
-    st.markdown("### Série Temporal com Outliers Destacados")
-    fig_temp = plot_temporal_outliers(series, results, indicador)
-    st.plotly_chart(fig_temp, use_container_width=True)
+    if not np.isfinite(skew):
+        return "zscore", "Não foi possível calcular skewness. Usando Z-score como padrão."
 
-    # Tabela
-    st.markdown("### Tabela de Outliers")
-    st.dataframe(results[results["outlier"]])
+    if abs(skew) <= 0.7:
+        return "zscore", f"Distribuição aproximadamente simétrica (skewness = {skew:.2f}). Z-score é adequado."
+    elif abs(skew) <= 2.0:
+        return "iqr", f"Distribuição levemente assimétrica (skewness = {skew:.2f}). IQR é mais robusto."
+    else:
+        return "mad", f"Distribuição fortemente assimétrica (skewness = {skew:.2f}). MAD é o método mais robusto."
 
-    # Narrativa
-    st.markdown("### 🧠 Interpretação dos Outliers")
-    st.info(gerar_narrativa(results))
+
+# ------------------------------------------------------------
+# Função única de detecção (público)
+# ------------------------------------------------------------
+def detect_outliers(
+    series: pd.Series,
+    method: str = "auto",
+    z_lim: float = 2.5,
+    iqr_k: float = 1.5,
+    mad_thresh: float = 3.5,
+) -> Tuple[pd.DataFrame, Dict[str, Any]]:
+    """
+    Detecta outliers em uma série numérica.
+
+    Retorna:
+      - DataFrame com colunas: valor, score, outlier, method
+      - dict com metadados (método usado, parâmetros, mensagem explicativa)
+    """
+
+    s = series.astype(float)
+
+    auto_msg = ""
+    method_used: OutlierMethod
+
+    if method == "auto":
+        method_used, auto_msg = suggest_outlier_method(s)
+    else:
+        method = method.lower()
+        if method not in ("zscore", "iqr", "mad"):
+            method_used, auto_msg = suggest_outlier_method(s)
+        else:
+            method_used = method  # type: ignore
+
+    if method_used == "zscore":
+        df_res = _detect_zscore(s, z_lim)
+        params = {"z_lim": z_lim}
+    elif method_used == "iqr":
+        df_res = _detect_iqr(s, iqr_k)
+        params = {"k": iqr_k}
+    else:  # "mad"
+        df_res = _detect_mad(s, mad_thresh)
+        params = {"thresh": mad_thresh}
+
+    df_res["method"] = method_used
+
+    info: Dict[str, Any] = {
+        "method": method_used,
+        "auto_message": auto_msg,
+        "params": params,
+        "n": int(len(s)),
+        "n_outliers": int(df_res["outlier"].sum()),
+    }
+
+    return df_res, info
