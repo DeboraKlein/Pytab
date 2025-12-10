@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 
@@ -26,6 +27,7 @@ def analisar_correlacao(df: pd.DataFrame):
     data = df[cols].dropna()
     corr = data.corr()
 
+    # Heatmap confiável
     fig = go.Figure(
         data=go.Heatmap(
             z=corr.values,
@@ -39,22 +41,24 @@ def analisar_correlacao(df: pd.DataFrame):
         )
     )
 
-    fig.update_layout(
-        title="Matriz de Correlação",
-        xaxis=dict(side="top")
-    )
-
+    fig.update_layout(title="Matriz de Correlação", xaxis=dict(side="top"))
     fig = style_plotly(fig)
+
     st.plotly_chart(fig, use_container_width=True)
 
-    # pega maior correlação
-    tri = corr.where(~pd.np.tril(pd.np.ones(corr.shape)).astype(bool))
-    max_pos = tri.unstack().abs().idxmax()
+    # Identificação da maior correlação (somente triângulo superior)
+    corr_abs = corr.abs()
+    mask = np.tril(np.ones(corr_abs.shape)).astype(bool)
+    corr_upper = corr_abs.where(~mask)
+
+    max_pos = corr_upper.unstack().idxmax()
+    var1, var2 = max_pos
+    corr_val = corr.loc[var1, var2]
 
     summary = {
-        "var1": max_pos[0],
-        "var2": max_pos[1],
-        "corr": corr.loc[max_pos[0], max_pos[1]]
+        "var1": var1,
+        "var2": var2,
+        "corr": corr_val
     }
 
     st.markdown(gerar_narrativa_correlacao(summary))
