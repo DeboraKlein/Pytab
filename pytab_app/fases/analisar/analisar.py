@@ -1,64 +1,67 @@
-import streamlit as st
-import matplotlib.pyplot as plt
+"""
+Fase ANALISAR do PyTab — Lean Six Sigma
+
+Objetivo:
+- Entender relações entre variáveis
+- Identificar concentrações de impacto (Pareto)
+- Avaliar relações lineares simples (regressão)
+"""
+
 import pandas as pd
-from pytab.charts.theme import apply_pytab_theme
+import streamlit as st
 
-apply_pytab_theme()
-
-PRIMARY = "#1f77b4"
-SECONDARY = "#ec7f00"
-
+from .correlacao import analisar_correlacao
+from .pareto import analisar_pareto
+from .regressao import analisar_regressao
+from .narrativas import (
+    gerar_narrativa_correlacao,
+    gerar_narrativa_pareto,
+    gerar_narrativa_regressao,
+)
 
 
 def fase_analisar(df: pd.DataFrame):
-    st.header("Fase Analisar — Identificação de Padrões e Outliers")
+    st.header("Fase Analisar — Relações e Causas Prováveis")
 
-    numeric_cols = df.select_dtypes(include=["number"]).columns.tolist()
-    if not numeric_cols:
-        st.warning("Nenhuma coluna numérica disponível para análise.")
-        return
+    st.markdown(
+        "Nesta fase, o objetivo é entender **como as variáveis se relacionam** entre si "
+        "e quais dimensões concentram a maior parte do impacto. "
+        "Use os blocos abaixo para explorar correlações, Pareto e regressão simples."
+    )
 
-    indicador = st.selectbox("Selecione o indicador", numeric_cols)
+    # ======================================================
+    # 1. Correlação
+    # ======================================================
+    st.divider()
+    st.markdown("### 1. Correlação entre variáveis")
+    resumo_corr = analisar_correlacao(df)
 
-    z_lim = st.slider("Z-Score para detectar outliers", 1.5, 4.0, 3.0, step=0.1)
+    # ======================================================
+    # 2. Pareto
+    # ======================================================
+    st.divider()
+    st.markdown("### 2. Análise de Pareto")
+    resumo_par = analisar_pareto(df)
 
-    serie = df[indicador].dropna()
-    media = serie.mean()
-    desvio = serie.std()
+    # ======================================================
+    # 3. Regressão linear simples
+    # ======================================================
+    st.divider()
+    st.markdown("### 3. Regressão linear simples")
+    resumo_reg = analisar_regressao(df)
 
-    z_scores = (serie - media) / desvio
-    outliers = serie[abs(z_scores) > z_lim]
+    # ======================================================
+    # 4. Resumo textual da fase Analisar
+    # ======================================================
+    st.divider()
+    st.markdown("### 4. Resumo textual da análise")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Média", f"{media:,.2f}")
-    with col2:
-        st.metric("Desvio Padrão", f"{desvio:,.2f}")
+    # Gera um pequeno painel de resumo, usando os últimos resultados
+    textos = []
 
-    st.write(f"Foram encontrados **{len(outliers)} outliers** usando Z > {z_lim}")
+    textos.append(gerar_narrativa_correlacao(resumo_corr))
+    textos.append(gerar_narrativa_pareto(resumo_par))
+    textos.append(gerar_narrativa_regressao(resumo_reg))
 
-    # Gráfico de densidade com outliers marcados
-    fig, ax = plt.subplots(figsize=(10, 4))
-    ax.scatter(serie.index, serie.values, color=PRIMARY, alpha=0.6, label="Valores")
-    ax.scatter(outliers.index, outliers.values, color=SECONDARY, label="Outliers", s=60)
-    ax.axhline(media, color="#444444", linestyle="--", linewidth=1, label="Média")
-
-    ax.set_title(f"Distribuição e Outliers — {indicador}")
-    ax.set_ylabel(indicador)
-    ax.grid(True, alpha=0.25)
-    ax.legend()
-
-    st.pyplot(fig)
-    plt.close(fig)
-
-    # Pareto de magnitude dos desvios
-    desvios_abs = (serie - media).abs().sort_values(ascending=False)
-
-    fig2, ax2 = plt.subplots(figsize=(10, 4))
-    ax2.bar(desvios_abs.index[:15], desvios_abs.values[:15], color=PRIMARY)
-    ax2.set_title(f"Pareto — 15 maiores desvios absolutos ({indicador})")
-    ax2.set_ylabel("Desvio absoluto")
-    ax2.grid(True, alpha=0.25)
-
-    st.pyplot(fig2)
-    plt.close(fig2)
+    for t in textos:
+        st.markdown(f"- {t}")
