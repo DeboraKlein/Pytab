@@ -7,102 +7,76 @@ from pytab.charts.theme import PRIMARY, SECONDARY, style_plotly
 from .narrativas import gerar_narrativa_pareto
 
 
-def analisar_pareto(df: pd.DataFrame) -> dict | None:
-    """
-    Renderiza a análise de Pareto e retorna um resumo para narrativas.
-    """
+def analisar_pareto(df: pd.DataFrame):
 
     st.subheader("Análise de Pareto")
 
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
-    num_cols = df.select_dtypes(include=["number", "float", "int"]).columns.tolist()
+    num_cols = df.select_dtypes(include=["number"]).columns.tolist()
 
     if not cat_cols or not num_cols:
-        st.info("É necessário ter pelo menos uma coluna categórica e uma numérica para o Pareto.")
+        st.info("Selecione ao menos uma coluna categórica e uma numérica.")
         return None
 
-    col_cat = st.selectbox("Selecione a dimensão (categoria)", cat_cols)
-    col_val = st.selectbox("Selecione a métrica (valor)", num_cols)
+    col_cat = st.selectbox("Dimensão", cat_cols)
+    col_val = st.selectbox("Métrica", num_cols)
 
-    df_aux = df[[col_cat, col_val]].dropna()
-    if df_aux.empty:
-        st.warning("Não há dados suficientes para esta combinação de colunas.")
-        return None
+    d = df[[col_cat, col_val]].dropna()
+    serie = d.groupby(col_cat)[col_val].sum().sort_values(ascending=False)
 
-    # Agregação por categoria
-    serie = df_aux.groupby(col_cat)[col_val].sum().sort_values(ascending=False)
     total = serie.sum()
-    if total == 0:
-        st.warning("A soma dos valores é zero; não é possível montar o Pareto.")
-        return None
-
     perc = serie / total
-    cum_perc = perc.cumsum()
+    cum = perc.cumsum() * 100
 
-    pareto_df = pd.DataFrame(
-        {
-            "Categoria": serie.index,
-            "Valor": serie.values,
-            "Percentual": perc.values * 100,
-            "Percentual acumulado": cum_perc.values * 100,
-        }
-    )
-
-    # Definir quantas categorias cobrem ~80%
-    n_top = int((cum_perc <= 0.8).sum())
-    if n_top == 0:
-        n_top = 1
-    top_cats = pareto_df["Categoria"].iloc[:n_top].tolist()
-    top_share = pareto_df["Percentual acumulado"].iloc[n_top - 1]
-
-    # Gráfico de Pareto
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Barras
     fig.add_trace(
         go.Bar(
-            x=pareto_df["Categoria"],
-            y=pareto_df["Valor"],
+            x=serie.index,
+            y=serie.values,
             name="Valor",
             marker_color=PRIMARY,
         ),
-        secondary_y=False,
+        secondary_y=False
     )
 
-    # Linha cumulativa
     fig.add_trace(
         go.Scatter(
-            x=pareto_df["Categoria"],
-            y=pareto_df["Percentual acumulado"],
+            x=serie.index,
+            y=cum,
             name="Percentual acumulado",
             mode="lines+markers",
-            line=dict(color=SECONDARY, width=2),
+            line=dict(color=SECONDARY, width=3),
         ),
-        secondary_y=True,
+        secondary_y=True
     )
+
+    # remove linha estranha
+    fig.update_yaxes(showgrid=False, zeroline=False, secondary_y=True)
 
     fig.update_layout(
         title=f"Pareto de {col_val} por {col_cat}",
         xaxis_title=col_cat,
         yaxis_title="Valor",
     )
-    fig.update_yaxes(title_text="Percentual acumulado (%)", secondary_y=True)
 
     fig = style_plotly(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("Tabela detalhada (ordenada por contribuição):")
-    st.dataframe(pareto_df, use_container_width=True)
+    # identificar 80/20
+    n_top = (cum <= 80).sum()
+    top_cats = serie.index[:n_top].tolist()
+    share = float(cum.iloc[n_top - 1])
 
     summary = {
         "dimensao": col_cat,
         "metricao": col_val,
         "top_categorias": top_cats,
-        "top_share": float(top_share),
-        "n_top": int(n_top),
+        "top_share": share,
+        "n_top": n_top,
     }
 
-    texto = gerar_narrativa_pareto(summary)
-    st.markdown(texto)
+    st.markdown(gerar_narrativa_pareto(summary))
 
     return summary
+
