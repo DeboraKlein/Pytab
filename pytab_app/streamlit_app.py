@@ -10,10 +10,10 @@ from pytab.utils.app_utils import (
     detect_types,
     show_column_warnings
 )
-from pytab_app.fases.medir import fase_medir
-from pytab_app.fases.analisar import fase_analisar
-from pytab_app.fases.melhorar import fase_melhorar
-from pytab_app.fases.controlar import fase_controlar
+from pytab_app.fases.medir.medir import fase_medir
+from pytab_app.fases.analisar.analisar import fase_analisar
+from pytab_app.fases.melhorar.melhorar import fase_melhorar
+from pytab_app.fases.controlar.controlar import fase_controlar
 
 
 def _fase_definir() -> None:

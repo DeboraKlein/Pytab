@@ -18,7 +18,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-from pytab_app.modules.aggregation import agregar_periodo
+from pytab_app.modules.aggregation import aggregate_series, detect_date_column
 from pytab_app.modules.trend_plot import plot_tendencia
 from pytab_app.modules.outliers import detectar_outliers
 from pytab_app.fases.medir.visoes import grafico_boxplot, grafico_outliers
@@ -63,7 +63,7 @@ def exibir_cards(stats: dict):
 
 def fase_medir(df: pd.DataFrame):
 
-    st.header("📏 Fase Medir — Compreensão do Indicador")
+    st.header(" Fase Medir — Compreensão do Indicador")
 
     # ------------------------------------------------------
     #  Escolha do indicador
@@ -115,7 +115,7 @@ def fase_medir(df: pd.DataFrame):
     # ------------------------------------------------------
     #  Agregação Temporal
     # ------------------------------------------------------
-    df_agregado = agregar_periodo(df, coluna_data, indicador, periodicidade)
+    df_agregado = aggregate_series(df, coluna_data, indicador, periodicidade)
 
     # ------------------------------------------------------
     #  Estatísticas descritivas
