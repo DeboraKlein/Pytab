@@ -1,82 +1,68 @@
 import pandas as pd
-import streamlit as st
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
+from pytab.charts.theme import PRIMARY, SECONDARY, apply_pytab_theme
 
-from pytab.charts.theme import PRIMARY, SECONDARY, style_plotly
-from .narrativas import gerar_narrativa_pareto
+apply_pytab_theme()
 
 
-def analisar_pareto(df: pd.DataFrame):
+def analisar_pareto(df):
+    """
+    Retorna:
+    - fig: figura do Pareto
+    - tabela: dataframe com valores e % acumulado
+    """
 
-    st.subheader("Análise de Pareto")
+    # ---------------------------------------------------------
+    # Seleção da coluna categórica
+    # ---------------------------------------------------------
+    cat_cols = df.select_dtypes(include=["object", "category"]).columns
 
-    cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
-    num_cols = df.select_dtypes(include=["number"]).columns.tolist()
+    if len(cat_cols) == 0:
+        return None, None
 
-    if not cat_cols or not num_cols:
-        st.info("Selecione ao menos uma coluna categórica e uma numérica.")
-        return None
+    coluna = cat_cols[0]  # simples por enquanto
 
-    col_cat = st.selectbox("Dimensão", cat_cols)
-    col_val = st.selectbox("Métrica", num_cols)
+    serie = df[coluna].dropna()
 
-    d = df[[col_cat, col_val]].dropna()
-    serie = d.groupby(col_cat)[col_val].sum().sort_values(ascending=False)
+    if serie.empty:
+        return None, None
 
-    total = serie.sum()
-    perc = serie / total
-    cum = perc.cumsum() * 100
+    # ---------------------------------------------------------
+    # Cálculo do Pareto
+    # ---------------------------------------------------------
+    contagens = serie.value_counts()
+    valores = contagens.values
+    categorias = contagens.index
 
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    contrib_pct = valores / valores.sum() * 100
+    acum_pct = contrib_pct.cumsum()
 
-    fig.add_trace(
-        go.Bar(
-            x=serie.index,
-            y=serie.values,
-            name="Valor",
-            marker_color=PRIMARY,
-        ),
-        secondary_y=False
-    )
+    tabela = pd.DataFrame({
+        "Categoria": categorias,
+        "Frequência": valores,
+        "%": contrib_pct.round(2),
+        "% Acumulado": acum_pct.round(2)
+    })
 
-    fig.add_trace(
-        go.Scatter(
-            x=serie.index,
-            y=cum,
-            name="Percentual acumulado",
-            mode="lines+markers",
-            line=dict(color=SECONDARY, width=3),
-        ),
-        secondary_y=True
-    )
+    # ---------------------------------------------------------
+    # Gráfico Pareto
+    # ---------------------------------------------------------
+    fig, ax1 = plt.subplots(figsize=(10, 5))
 
-    # remove linha estranha
-    fig.update_yaxes(showgrid=False, zeroline=False, secondary_y=True)
+    ax1.bar(categorias, valores, color=PRIMARY)
+    ax1.set_ylabel("Frequência", color=PRIMARY)
+    ax1.set_xticklabels(categorias, rotation=30, ha="right")
 
-    fig.update_layout(
-        title=f"Pareto de {col_val} por {col_cat}",
-        xaxis_title=col_cat,
-        yaxis_title="Valor",
-    )
+    ax2 = ax1.twinx()
+    ax2.plot(categorias, acum_pct, color=SECONDARY, marker="o", linewidth=2)
+    ax2.set_ylabel("% Acumulado", color=SECONDARY)
+    ax2.set_ylim(0, 110)
 
-    fig = style_plotly(fig)
-    st.plotly_chart(fig, use_container_width=True)
+    ax1.grid(axis="y", alpha=0.25)
+    ax2.grid(False)
 
-    # identificar 80/20
-    n_top = (cum <= 80).sum()
-    top_cats = serie.index[:n_top].tolist()
-    share = float(cum.iloc[n_top - 1])
+    fig.tight_layout()
 
-    summary = {
-        "dimensao": col_cat,
-        "metricao": col_val,
-        "top_categorias": top_cats,
-        "top_share": share,
-        "n_top": n_top,
-    }
+    return fig, tabela
 
-    st.markdown(gerar_narrativa_pareto(summary))
-
-    return summary
 

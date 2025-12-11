@@ -1,56 +1,47 @@
-# DMAIC e o Papel do PyTab
+# DMAIC no PyTab
 
-Este documento explica como o PyTab se conecta ao ciclo DMAIC do Lean Six Sigma.
-
----
-
-## Define
-Nesta fase não há cálculos estatísticos. O PyTab não atua diretamente aqui.
+O PyTab foi projetado para suportar projetos Lean Six Sigma.
 
 ---
 
-## Measure
-O PyTab oferece:
-
-- estatísticas descritivas
-- pré-visualização dos dados
-- identificação de tipos de colunas (numéricas, categoriais, datas)
-
-Essas funções suportam a medição e entendimento inicial do processo.
+## Definir
+(futuro)  
+- descrição do problema  
+- VOC vs VOP  
+- meta do processo  
 
 ---
 
-## Analyze
-O PyTab auxilia a análise estatística por meio de:
-
-- distribuição
-- detecção de outliers
-- cálculo de z-score
-- boxplots e histogramas
-- gráficos de Pareto
-- gráficos de controle (SPC)
-
-Essas ferramentas ajudam a identificar variações, causas especiais e padrões.
+## Medir
+(concluído / em evolução)  
+- estatísticas  
+- variabilidade  
+- outliers  
+- comportamento temporal  
+- CV  
+- estabilidade  
 
 ---
 
-## Improve
-Fase principalmente operacional. O PyTab apoia a avaliação de mudanças por meio de:
-
-- comparação de distribuições antes/depois
-- controle estatístico após intervenções
-
----
-
-## Control
-O PyTab ajuda a manter o processo sob controle oferecendo:
-
-- gráficos de controle
-- limites de controle
-- relatórios executivos e técnicos
-- monitoramento contínuo de métricas
+## Analisar
+(concluído / em evolução)  
+- correlação  
+- Pareto  
+- regressão  
+- investigação de causas  
 
 ---
 
-## Conclusão
-O PyTab não executa o DMAIC, mas oferece as ferramentas estatísticas essenciais para realizar a análise de dados dentro da metodologia.
+## Melhorar
+(futuro)  
+- simulação  
+- previsão  
+- análise do impacto  
+
+---
+
+## Controlar
+(futuro)  
+- cartas de controle  
+- limites dinâmicos  
+- monitoramento  

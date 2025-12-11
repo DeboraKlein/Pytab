@@ -3,62 +3,70 @@
 </p>
 
 
-# PyTab – Roadmap
 
-Este documento descreve as principais etapas de evolução do PyTab.
+---
 
-## Versão 0.1.0 – Fundamentos
+# 4) `ROADMAP.md`
 
-- [ ] Leitura robusta de CSV e Excel (incluindo separadores problemáticos).
-- [ ] Detecção automática de tipos de coluna:
-  - Numéricas
-  - Categóricas
-  - Datas
-- [ ] Estatísticas descritivas básicas:
-  - média, mediana, desvio-padrão, mínimos, máximos, quartis.
-- [ ] Estrutura base para gráficos:
-  - histograma
-  - boxplot
-  - distribuição (curva aproximada)
-- [ ] Esqueleto do app Streamlit:
-  - upload de arquivo
-  - seleção de coluna
-  - visualização básica.
+```markdown
+# ROADMAP PyTab
 
-## Versão 0.2.0 – Distribuição e Outliers
+Plano de evolução estratégica.
 
-- [ ] Cálculo automático de z-score por coluna numérica.
-- [ ] Identificação de outliers.
-- [ ] Visualizações:
-  - histograma com destaque de outliers.
-  - boxplot com realce de pontos extremos.
-- [ ] Tabela de outliers por coluna.
+---
 
-## Versão 0.3.0 – Gráficos de Controle (SPC)
+## Fase 1 — Consolidação Básica (Concluída / Em andamento)
+- Tema visual PyTab  
+- Leitura robusta de dados  
+- Fase Medir completa  
+- Fase Analisar (básica) completa  
+- Correlação  
+- Pareto  
+- Regressão simples  
+- Outliers com 4 métodos  
+- Arquitetura modular  
 
-- [ ] Gráfico de controle simples (XmR).
-- [ ] Cálculo de limites de controle.
-- [ ] Suporte a séries temporais com coluna de data.
-- [ ] Interface no app para escolher coluna e granularidade.
+---
 
-## Versão 0.4.0 – Pareto e Estratificação
+## Fase 2 — Estatística Avançada
+- Testes t (1-sample, 2-sample, paired)
+- ANOVA one-way
+- Qui-quadrado
+- Testes de normalidade
+- QQ-plot
+- Regressão múltipla
+- Regressão logística
 
-- [ ] Geração de gráfico de Pareto para colunas categóricas.
-- [ ] Filtros combinando numéricas, categorias e datas.
-- [ ] Drill-down: seleção de subgrupos para análise focada.
+---
 
-## Versão 0.5.0 – Relatórios em PDF
+## Fase 3 — Fase Melhorar
+- simulação de cenários  
+- análise “what-if”  
+- projeções  
+- otimização de causas  
 
-- [ ] Geração automática de relatório em PDF contendo:
-  - estatísticas descritivas,
-  - gráficos principais,
-  - tabela de outliers,
-  - seção de observações.
-- [ ] Inclusão de resumo executivo (texto geral) e resumo técnico.
+---
 
-## Versão 1.0.0 – Lançamento Oficial
+## Fase 4 — Fase Controlar
+- gráficos de controle:  
+  - Xbar-R  
+  - I-MR  
+  - P / NP  
+  - U / C  
+- limites dinâmicos  
+- narrativa de estabilidade  
 
-- [ ] Publicação oficial no PyPI.
-- [ ] Documentação completa em `docs/`.
-- [ ] Testes automatizados cobrindo os módulos principais.
-- [ ] Exemplos práticos em notebooks (ex: qualidade, finanças, saúde).
+---
+
+## Fase 5 — Relatórios Profissionais
+- exportação PDF  
+- controle completo da identidade visual  
+- modelos de relatório  
+
+---
+
+## Fase 6 — Publicação
+- testes automatizados  
+- preparo para PyPI  
+- empacotamento definitivo  
+- documentação oficial online  
