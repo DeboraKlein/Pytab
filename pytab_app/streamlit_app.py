@@ -113,9 +113,9 @@ def main() -> None:
     elif fase == "Analisar":
         fase_analisar(df)
     elif fase == "Melhorar":
-        fase_melhorar(df, types)
+        fase_melhorar(df)
     elif fase == "Controlar":
-        fase_controlar(df, types)
+        fase_controlar(df)
 
 
 if __name__ == "__main__":
