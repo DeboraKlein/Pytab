@@ -4,69 +4,71 @@ import streamlit as st
 import plotly.graph_objects as go
 
 from pytab.charts.theme import PRIMARY, SECONDARY, style_plotly
-from .narrativas import gerar_narrativa_regressao
 
 
-def analisar_regressao(df: pd.DataFrame) -> dict | None:
+def analisar_regressao(df: pd.DataFrame) -> None:
     """
-    Regressão linear simples (Y em função de X) com narrativa.
+    Regressão linear simples (Y ~ X) com narrativa automática.
     """
+    st.subheader("Regressão Linear Simples")
 
-    st.subheader("Regressão linear simples")
+    num_cols = df.select_dtypes(include=["number"]).columns.tolist()
+    if len(num_cols) < 2:
+        st.info("É necessário pelo menos duas colunas numéricas para rodar regressão.")
+        return
 
-    numeric_cols = df.select_dtypes(include=["number", "float", "int"]).columns.tolist()
-    if len(numeric_cols) < 2:
-        st.info("É necessário ter pelo menos duas colunas numéricas para regressão.")
-        return None
+    col_y = st.selectbox("Variável alvo (Y)", num_cols)
+    col_x = st.selectbox(
+        "Variável explicativa (X)",
+        [c for c in num_cols if c != col_y],
+    )
 
-    col_y = st.selectbox("Selecione a variável dependente (Y)", numeric_cols)
-    possiveis_x = [c for c in numeric_cols if c != col_y]
+    dados = df[[col_x, col_y]].dropna()
+    if dados.shape[0] < 3:
+        st.warning("Poucos pontos de dados para ajustar uma regressão confiável.")
+        return
 
-    if not possiveis_x:
-        st.info("Selecione outra combinação de variáveis para regressão.")
-        return None
+    x = dados[col_x].to_numpy(dtype=float)
+    y = dados[col_y].to_numpy(dtype=float)
 
-    col_x = st.selectbox("Selecione a variável explicativa (X)", possiveis_x)
+    x_mean = x.mean()
+    y_mean = y.mean()
 
-    df_xy = df[[col_x, col_y]].dropna()
-    if len(df_xy) < 2:
-        st.warning("Não há dados suficientes para ajustar o modelo.")
-        return None
+    cov = ((x - x_mean) * (y - y_mean)).sum()
+    var_x = ((x - x_mean) ** 2).sum()
 
-    x = df_xy[col_x].values.astype(float)
-    y = df_xy[col_y].values.astype(float)
+    if var_x == 0:
+        st.warning("A variável X não varia (variância zero). Não é possível ajustar regressão.")
+        return
 
-    # Ajuste da reta (y = a*x + b)
-    a, b = np.polyfit(x, y, 1)
-    y_pred = a * x + b
+    slope = cov / var_x
+    intercept = y_mean - slope * x_mean
+    y_pred = slope * x + intercept
 
-    # Cálculo de R²
-    ss_res = np.sum((y - y_pred) ** 2)
-    ss_tot = np.sum((y - np.mean(y)) ** 2)
-    r2 = 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
+    ss_tot = ((y - y_mean) ** 2).sum()
+    ss_res = ((y - y_pred) ** 2).sum()
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
     # Gráfico
     fig = go.Figure()
-
     fig.add_trace(
         go.Scatter(
             x=x,
             y=y,
             mode="markers",
+            marker=dict(color=PRIMARY, size=7),
             name="Dados observados",
-            marker=dict(color=PRIMARY, size=7, opacity=0.8),
         )
     )
-
-    # Linha de regressão (ordenando x para linha ficar bonita)
+    # ordenar X para a linha ficar “bonita”
     ordem = np.argsort(x)
     fig.add_trace(
         go.Scatter(
             x=x[ordem],
             y=y_pred[ordem],
             mode="lines",
-            name="Linha de regressão",
             line=dict(color=SECONDARY, width=2),
+            name="Reta ajustada",
         )
     )
 
@@ -79,24 +81,15 @@ def analisar_regressao(df: pd.DataFrame) -> dict | None:
     fig = style_plotly(fig)
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown(
-        f"""
-**Equação aproximada do modelo:**
+    # Narrativa
+    st.markdown(f"""
+### Resumo da regressão
 
-{col_y} ≈ {a:.3f} · {col_x} + {b:.3f}  
-R² ≈ {r2:.3f}
-"""
-    )
+- Equação estimada: **{col_y} ≈ {slope:.3f} × {col_x} + {intercept:.3f}**  
+- Coeficiente de determinação (R²): **{r2:.3f}**
 
-    summary = {
-        "x": col_x,
-        "y": col_y,
-        "coef_angular": float(a),
-        "intercepto": float(b),
-        "r2": float(r2),
-    }
+**Interpretação:**  
+Para cada aumento de 1 unidade em **{col_x}**, o modelo estima um aumento médio de
+**{slope:.3f}** unidades em **{col_y}**, em média.
+""")
 
-    texto = gerar_narrativa_regressao(summary)
-    st.markdown(texto)
-
-    return summary

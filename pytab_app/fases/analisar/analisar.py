@@ -1,9 +1,7 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 from pytab.charts.theme import apply_pytab_theme
-
-# Submódulos
 from pytab_app.fases.analisar.correlacao import mostrar_correlacao_streamlit
 from pytab_app.fases.analisar.pareto import analisar_pareto
 from pytab_app.fases.analisar.regressao import analisar_regressao
@@ -24,73 +22,57 @@ from pytab_app.modules.testes_estatisticos import (
 apply_pytab_theme()
 
 
-def fase_analisar(df: pd.DataFrame):
-    st.header("Fase Analisar — Identificação de Causas")
+def fase_analisar(df: pd.DataFrame) -> None:
+    st.header("Fase Analisar — Identificação de causas")
 
-    tabs = st.tabs([
-        "Correlação entre variáveis",
-        "Análise de Pareto",
-        "Regressão Linear",
-        "Testes estatísticos",
-        "Narrativa automática",
-    ])
+    abas = st.tabs(
+        [
+            "Correlação",
+            "Pareto",
+            "Regressão",
+            "Testes estatísticos",
+            "Narrativa automática",
+        ]
+    )
+
+    num_cols = df.select_dtypes(include=["number"]).columns.tolist()
+    cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
 
     # ============================================================
-    # TAB 1 — CORRELAÇÃO
+    # ABA 1 — CORRELAÇÃO
     # ============================================================
-    with tabs[0]:
-        st.subheader("Correlação entre variáveis")
+    with abas[0]:
         try:
             mostrar_correlacao_streamlit(df)
         except Exception as e:
             st.error(f"Erro ao calcular correlações: {e}")
 
     # ============================================================
-    # TAB 2 — PARETO
+    # ABA 2 — PARETO
     # ============================================================
-    with tabs[1]:
-        st.subheader("Análise de Pareto")
+    with abas[1]:
         try:
-            fig_pareto, tabela_pareto = analisar_pareto(df)
-
-            if fig_pareto is not None:
-                st.pyplot(fig_pareto)
-
-            if tabela_pareto is not None:
-                st.markdown("### Tabela de Contribuições")
-                st.dataframe(tabela_pareto)
-
+            analisar_pareto(df)
         except Exception as e:
             st.error(f"Erro ao gerar gráfico de Pareto: {e}")
 
     # ============================================================
-    # TAB 3 — REGRESSÃO
+    # ABA 3 — REGRESSÃO
     # ============================================================
-    with tabs[2]:
-        st.subheader("Regressão Linear Simples")
-
+    with abas[2]:
         try:
-            resultado = analisar_regressao(df)
-
-            if isinstance(resultado, list):
-                for bloco in resultado:
-                    st.markdown(bloco)
-            else:
-                st.markdown(resultado)
-
+            analisar_regressao(df)
         except Exception as e:
             st.error(f"Erro ao executar regressão: {e}")
 
     # ============================================================
-    # TAB 4 — TESTES ESTATÍSTICOS
+    # ABA 4 — TESTES ESTATÍSTICOS
     # ============================================================
-    with tabs[3]:
+    with abas[3]:
         st.subheader("Testes Estatísticos")
 
-        cols = df.columns.tolist()
-
         tipo = st.selectbox(
-            "Tipo de teste",
+            "Selecione o tipo de teste",
             [
                 "Teste t — 1 amostra",
                 "Teste t — 2 amostras",
@@ -101,62 +83,103 @@ def fase_analisar(df: pd.DataFrame):
             ],
         )
 
-        # --- 1 Amostra ---
+        # ---------------------- TESTE t 1 AMOSTRA ----------------------
         if tipo == "Teste t — 1 amostra":
-            numcol = st.selectbox("Variável numérica", df.select_dtypes(include=["number"]).columns)
-            media_hip = st.number_input("Média hipotética", value=0.0)
-            res = teste_t_uma_amostra(df[numcol], media_hip)
-            st.markdown(narrativa_t(res, "1-amostra"))
-
-        # --- 2 Amostras ---
-        elif tipo == "Teste t — 2 amostras":
-            numcol = st.selectbox("Variável numérica", df.select_dtypes(include=["number"]).columns)
-            cat = st.selectbox("Variável categórica", df.select_dtypes(include=["object", "category"]).columns)
-
-            grupos = df[cat].dropna().unique()
-            if len(grupos) != 2:
-                st.warning("A variável categórica deve ter exatamente 2 grupos.")
+            if not num_cols:
+                st.warning("Não há colunas numéricas para este teste.")
             else:
-                g1 = df[df[cat] == grupos[0]][numcol]
-                g2 = df[df[cat] == grupos[1]][numcol]
-                res = teste_t_duas_amostras(g1, g2)
-                st.markdown(narrativa_t(res, "2-amostras"))
+                col = st.selectbox("Variável numérica", num_cols)
+                media_hip = st.number_input(
+                    "Média hipotética",
+                    value=float(df[col].dropna().mean()) if not df[col].dropna().empty else 0.0,
+                )
+                res = teste_t_uma_amostra(df[col], media_hip)
+                st.markdown(narrativa_t(res, "1-amostra"))
 
-        # --- Pareado ---
+        # ---------------------- TESTE t 2 AMOSTRAS ----------------------
+        elif tipo == "Teste t — 2 amostras":
+            if not num_cols or not cat_cols:
+                st.warning("É necessário ter ao menos uma numérica e uma categórica.")
+            else:
+                numcol = st.selectbox("Variável numérica", num_cols)
+                cat = st.selectbox("Variável categórica", cat_cols)
+
+                grupos = df[cat].dropna().unique()
+                if len(grupos) < 2:
+                    st.warning("A variável categórica selecionada precisa ter pelo menos 2 grupos.")
+                else:
+                    g1_label = st.selectbox("Grupo 1", grupos, index=0, key="t2_g1")
+                    g2_opcoes = [g for g in grupos if g != g1_label]
+                    if not g2_opcoes:
+                        st.warning("Selecione uma variável com mais de 1 grupo distinto.")
+                    else:
+                        g2_label = st.selectbox("Grupo 2", g2_opcoes, index=0, key="t2_g2")
+                        g1 = df[df[cat] == g1_label][numcol]
+                        g2 = df[df[cat] == g2_label][numcol]
+
+                        res = teste_t_duas_amostras(g1, g2)
+                        st.markdown(narrativa_t(res, "2-amostras"))
+
+        # ---------------------- TESTE t PAREADO ----------------------
         elif tipo == "Teste t — Pareado":
-            cols_num = df.select_dtypes(include=["number"]).columns
-            col1 = st.selectbox("Primeira variável", cols_num)
-            col2 = st.selectbox("Segunda variável", cols_num)
-            res = teste_t_pareado(df[col1], df[col2])
-            st.markdown(narrativa_t(res, "pareado"))
+            if len(num_cols) < 2:
+                st.warning("São necessárias pelo menos duas variáveis numéricas.")
+            else:
+                col1 = st.selectbox("Primeira variável", num_cols, index=0)
+                col2 = st.selectbox(
+                    "Segunda variável",
+                    [c for c in num_cols if c != col1],
+                    index=0,
+                )
+                res = teste_t_pareado(df[col1], df[col2])
+                st.markdown(narrativa_t(res, "pareado"))
 
-        # --- ANOVA ---
+        # ---------------------- ANOVA ----------------------
         elif tipo == "ANOVA One-Way":
-            numcol = st.selectbox("Variável numérica", df.select_dtypes(include=["number"]).columns)
-            cat = st.selectbox("Variável categórica", df.select_dtypes(include=["object", "category"]).columns)
-            res = anova_oneway(df, numcol, cat)
-            st.write(res["anova"])
-            st.markdown(narrativa_anova(res))
+            if not num_cols or not cat_cols:
+                st.warning("É necessário ter ao menos uma numérica e uma categórica.")
+            else:
+                numcol = st.selectbox("Variável numérica", num_cols)
+                cat = st.selectbox("Variável categórica (fatores)", cat_cols)
 
-        # --- Qui-Quadrado ---
+                try:
+                    res = anova_oneway(df, numcol, cat)
+                    st.write(res["anova"])
+                    st.markdown(narrativa_anova(res))
+                except Exception as e:
+                    st.error(f"Erro ao executar ANOVA: {e}")
+
+        # ---------------------- QUI-QUADRADO ----------------------
         elif tipo == "Qui-Quadrado":
-            c1 = st.selectbox("Variável categórica 1", df.select_dtypes(include=["object", "category"]).columns)
-            c2 = st.selectbox("Variável categórica 2", df.select_dtypes(include=["object", "category"]).columns)
-            res = teste_quiquadrado(df, c1, c2)
-            st.write(res["tabela"])
-            st.markdown(narrativa_quiquadrado(res))
+            if len(cat_cols) < 2:
+                st.warning("São necessárias pelo menos duas variáveis categóricas.")
+            else:
+                c1 = st.selectbox("Variável categórica 1", cat_cols)
+                c2 = st.selectbox(
+                    "Variável categórica 2",
+                    [c for c in cat_cols if c != c1],
+                )
+                res = teste_quiquadrado(df, c1, c2)
+                st.write(res["tabela"])
+                st.markdown(narrativa_quiquadrado(res))
 
-        # --- Normalidade ---
+        # ---------------------- NORMALIDADE ----------------------
         elif tipo == "Normalidade":
-            col = st.selectbox("Variável numérica", df.select_dtypes(include=["number"]).columns)
-            res = teste_normalidade(df[col])
-            st.markdown(narrativa_normalidade(res))
-            fig = qqplot_figure(df[col])
-            st.plotly_chart(fig, use_container_width=True)
+            if not num_cols:
+                st.warning("Não há colunas numéricas para testar normalidade.")
+            else:
+                col = st.selectbox("Variável numérica", num_cols)
+                res = teste_normalidade(df[col])
+                st.markdown(narrativa_normalidade(res))
+                fig = qqplot_figure(df[col])
+                st.plotly_chart(fig, use_container_width=True)
 
     # ============================================================
-    # TAB 5 — NARRATIVA AUTOMÁTICA FUTURA
+    # ABA 5 — NARRATIVA AUTOMÁTICA (CONSOLIDADA)
     # ============================================================
-    with tabs[4]:
-        st.subheader("Narrativa automática consolidada")
-        st.info("Em desenvolvimento: será uma narrativa única integrando Pareto + Correlação + Regressão.")
+    with abas[4]:
+        st.subheader("Narrativa automática consolidada (em desenvolvimento)")
+        st.info(
+            "Aqui o PyTab vai integrar os principais achados de Correlação, Pareto, "
+            "Regressão e Testes estatísticos em uma narrativa única para o projeto DMAIC."
+        )

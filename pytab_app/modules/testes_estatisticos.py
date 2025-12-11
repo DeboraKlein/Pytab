@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import scipy.stats as stats
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
@@ -12,96 +12,138 @@ from pytab.charts.theme import PRIMARY, SECONDARY
 # 1) TESTES t
 # ============================================================
 
-def teste_t_uma_amostra(serie, media_hipotetica):
+def teste_t_uma_amostra(serie: pd.Series, media_hipotetica: float) -> dict:
     serie = serie.dropna()
     t_stat, p = stats.ttest_1samp(serie, media_hipotetica)
-
     return {
-        "media": serie.mean(),
+        "media": float(serie.mean()),
+        "hipotese": media_hipotetica,
         "t": float(t_stat),
         "p": float(p),
-        "hipotese": media_hipotetica
+        "n": int(serie.shape[0]),
     }
 
 
-def teste_t_duas_amostras(grupo1, grupo2):
+def teste_t_duas_amostras(
+    grupo1: pd.Series,
+    grupo2: pd.Series,
+    equal_var: bool = False,
+) -> dict:
     grupo1 = grupo1.dropna()
     grupo2 = grupo2.dropna()
 
-    t_stat, p = stats.ttest_ind(grupo1, grupo2, equal_var=False)
-
+    t_stat, p = stats.ttest_ind(grupo1, grupo2, equal_var=equal_var)
     return {
-        "media1": grupo1.mean(),
-        "media2": grupo2.mean(),
+        "media1": float(grupo1.mean()),
+        "media2": float(grupo2.mean()),
+        "n1": int(grupo1.shape[0]),
+        "n2": int(grupo2.shape[0]),
         "t": float(t_stat),
         "p": float(p),
     }
 
 
-def teste_t_pareado(grupo1, grupo2):
-    grupo1 = grupo1.dropna()
-    grupo2 = grupo2.dropna()
+def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
+    # considera apenas pares completos
+    df = pd.concat([grupo1, grupo2], axis=1).dropna()
+    g1 = df.iloc[:, 0]
+    g2 = df.iloc[:, 1]
 
-    t_stat, p = stats.ttest_rel(grupo1, grupo2)
+    t_stat, p = stats.ttest_rel(g1, g2)
 
     return {
-        "media1": grupo1.mean(),
-        "media2": grupo2.mean(),
+        "media1": float(g1.mean()),
+        "media2": float(g2.mean()),
+        "n": int(df.shape[0]),
         "t": float(t_stat),
         "p": float(p),
     }
 
 
-def narrativa_t(resultado, tipo):
+def narrativa_t(resultado: dict, tipo: str) -> str:
     p = resultado["p"]
-    conclusao = "Há evidência estatística de diferença." if p < 0.05 else "Não há evidência de diferença significativa."
+    conclusao = (
+        "Há evidência estatística de diferença."
+        if p < 0.05
+        else "Não há evidência estatística de diferença significativa."
+    )
 
     if tipo == "1-amostra":
         return f"""
 ### Teste t — 1 amostra
 Média observada: **{resultado['media']:.2f}**  
 Média hipotética: **{resultado['hipotese']}**  
-p-valor: **{p:.4f}**
+n = {resultado['n']}  
+t = {resultado['t']:.3f}  
+p-valor = **{p:.4f}**
 
 **Conclusão:** {conclusao}
 """
 
-    else:
+    if tipo == "2-amostras":
         return f"""
-### Teste t — {tipo}
-Média do grupo 1: **{resultado['media1']:.2f}**  
-Média do grupo 2: **{resultado['media2']:.2f}**  
-p-valor: **{p:.4f}**
+### Teste t — 2 amostras independentes
+Grupo 1 — média: **{resultado['media1']:.2f}** (n = {resultado['n1']})  
+Grupo 2 — média: **{resultado['media2']:.2f}** (n = {resultado['n2']})  
+t = {resultado['t']:.3f}  
+p-valor = **{p:.4f}**
 
 **Conclusão:** {conclusao}
 """
 
+    if tipo == "pareado":
+        return f"""
+### Teste t — pareado
+Média antes: **{resultado['media1']:.2f}**  
+Média depois: **{resultado['media2']:.2f}**  
+n pares = {resultado['n']}  
+t = {resultado['t']:.3f}  
+p-valor = **{p:.4f}**
+
+**Conclusão:** {conclusao}
+"""
+
+    return f"Teste t ({tipo}) executado. p-valor = {p:.4f}. {conclusao}"
+
 
 # ============================================================
-# 2) ANOVA
+# 2) ANOVA ONE-WAY
 # ============================================================
 
-def anova_oneway(df, numerica, categoria):
-    df = df[[numerica, categoria]].dropna()
+def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
+    """
+    Executa ANOVA One-Way lidando com nomes de coluna com espaço.
 
-    modelo = smf.ols(f"{numerica} ~ C({categoria})", data=df).fit()
-    tabela = sm.stats.anova_lm(modelo)
+    Renomeia colunas para nomes seguros internamente e usa statsmodels.
+    """
+    dados = df[[numerica, categoria]].dropna()
 
-    return {
-        "anova": tabela,
-        "modelo": modelo
-    }
+    if dados.empty:
+        raise ValueError("Não há dados suficientes para ANOVA.")
+
+    y_name = "y_var"
+    x_name = "x_cat"
+    dados_local = dados.rename(columns={numerica: y_name, categoria: x_name})
+
+    modelo = smf.ols(f"{y_name} ~ C({x_name})", data=dados_local).fit()
+    tabela = sm.stats.anova_lm(modelo, typ=2)
+
+    return {"anova": tabela, "modelo": modelo, "y": numerica, "x": categoria}
 
 
-def narrativa_anova(resultado):
+def narrativa_anova(resultado: dict) -> str:
     tabela = resultado["anova"]
-    p = tabela["PR(>F)"][0]
+    p = float(tabela["PR(>F)"].iloc[0])
 
-    conclusao = "Há diferença estatística entre os grupos." if p < 0.05 else "Não há evidência de diferença estatística."
+    conclusao = (
+        "Há diferença estatística entre pelo menos um dos grupos."
+        if p < 0.05
+        else "Não há evidência estatística de diferença entre as médias dos grupos."
+    )
 
     return f"""
 ### ANOVA One-Way
-p-valor: **{p:.4f}**
+p-valor = **{p:.4f}**
 
 **Conclusão:** {conclusao}
 """
@@ -111,80 +153,107 @@ p-valor: **{p:.4f}**
 # 3) QUI-QUADRADO
 # ============================================================
 
-def teste_quiquadrado(df, cat1, cat2):
+def teste_quiquadrado(df: pd.DataFrame, cat1: str, cat2: str) -> dict:
     tabela = pd.crosstab(df[cat1], df[cat2])
-    chi2, p, gl, esperado = stats.chi2_contingency(tabela)
+    chi2, p, dof, expected = stats.chi2_contingency(tabela)
 
     return {
         "tabela": tabela,
         "chi2": float(chi2),
         "p": float(p),
-        "gl": int(gl)
+        "dof": int(dof),
+        "esperado": expected,
     }
 
 
-def narrativa_quiquadrado(resultado):
+def narrativa_quiquadrado(resultado: dict) -> str:
     p = resultado["p"]
     conclusao = (
-        "Existe associação entre as variáveis."
+        "Há evidência de associação entre as variáveis."
         if p < 0.05
-        else "Não há evidência de associação entre as variáveis."
+        else "Não há evidência estatística de associação entre as variáveis."
     )
 
     return f"""
 ### Teste Qui-Quadrado
-Chi² = **{resultado['chi2']:.2f}**  
-p-valor = **{resultado['p']:.4f}**
+Qui² = {resultado['chi2']:.3f}  
+gl = {resultado['dof']}  
+p-valor = **{p:.4f}**
 
 **Conclusão:** {conclusao}
 """
 
 
 # ============================================================
-# 4) NORMALIDADE
+# 4) NORMALIDADE + QQ-PLOT
 # ============================================================
 
-def teste_normalidade(series):
-    series = series.dropna()
+def teste_normalidade(serie: pd.Series, metodo: str = "shapiro") -> dict:
+    serie = serie.dropna()
 
-    try:
-        stat, p = stats.shapiro(series)
-        metodo = "Shapiro-Wilk"
-    except:
-        stat, p = stats.anderson(series)[0], None
-        metodo = "Anderson-Darling"
+    if serie.shape[0] < 3:
+        return {"metodo": metodo, "p": None, "stat": None}
+
+    if metodo == "shapiro":
+        stat, p = stats.shapiro(serie)
+    else:
+        # por enquanto mantemos apenas Shapiro como padrão
+        stat, p = stats.shapiro(serie)
 
     return {
         "metodo": metodo,
         "stat": float(stat),
-        "p": None if p is None else float(p)
+        "p": float(p),
     }
 
 
-def qqplot_figure(series):
-    series = series.dropna()
+def qqplot_figure(serie: pd.Series) -> go.Figure:
+    serie = serie.dropna()
+    qq = sm.ProbPlot(serie, fit=True)
+
+    teoricos = qq.theoretical_quantiles
+    amostra = qq.sample_quantiles
+
     fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=teoricos,
+            y=amostra,
+            mode="markers",
+            marker=dict(color=PRIMARY, size=6),
+            name="Dados",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=teoricos,
+            y=teoricos,
+            mode="lines",
+            line=dict(color=SECONDARY, width=2),
+            name="Linha Normal",
+        )
+    )
 
-    qq = sm.ProbPlot(series, fit=True)
-    linha = qq.theoretical_quantiles
-    pontos = qq.sample_quantiles
+    fig.update_layout(
+        title="QQ-Plot",
+        xaxis_title="Quantis teóricos",
+        yaxis_title="Quantis observados",
+    )
 
-    fig.add_trace(go.Scatter(x=linha, y=pontos, mode="markers", marker=dict(color=PRIMARY)))
-    fig.add_trace(go.Scatter(x=linha, y=linha, mode="lines", line=dict(color=SECONDARY)))
-
-    fig.update_layout(title="QQ-Plot", xaxis_title="Quantis Teóricos", yaxis_title="Quantis Observados")
     return fig
 
 
-def narrativa_normalidade(resultado):
+def narrativa_normalidade(resultado: dict) -> str:
     metodo = resultado["metodo"]
     p = resultado["p"]
 
     if p is None:
-        return f"O teste {metodo} foi aplicado. Use a análise visual do QQ-Plot para interpretar."
+        return f"O teste de normalidade ({metodo}) não pôde ser calculado por falta de dados."
 
     conclusao = (
-        "Os dados **não seguem** distribuição normal." if p < 0.05 else "Os dados **seguem** distribuição normal."
+        "Os dados **não seguem** distribuição normal (p < 0,05)."
+        if p < 0.05
+        else "Os dados **seguem** distribuição aproximadamente normal (p ≥ 0,05)."
     )
 
     return f"""
@@ -194,7 +263,3 @@ p-valor = **{p:.4f}**
 **Conclusão:** {conclusao}
 """
 
-
-# ============================================================
-# FIM DO MÓDULO
-# ============================================================
