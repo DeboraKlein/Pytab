@@ -1,0 +1,25 @@
+{
+    "t_test_one_sample.csv": {
+        "mean": 25.4,
+        "std": 2.91,
+        "n": 15,
+        "t_stat": 2.12,
+        "p_value": 0.047
+    },
+
+    "anova_example.csv": {
+        "group_means": {
+            "A": 10.2,
+            "B": 13.5,
+            "C": 15.1
+        },
+        "f_stat": 5.12,
+        "p_value": 0.013
+    },
+
+    "regression_example.csv": {
+        "slope": 1.88,
+        "intercept": 290.1,
+        "r2": 0.8032
+    }
+}

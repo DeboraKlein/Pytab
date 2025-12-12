@@ -9,105 +9,139 @@ from .narrativa import narrativa_imr, narrativa_xbar_r, narrativa_p, narrativa_u
 apply_pytab_theme()
 
 
+def _colunas_numericas(df: pd.DataFrame):
+    return df.select_dtypes(include=["number"]).columns.tolist()
+
+
+def _colunas_categoricas(df: pd.DataFrame):
+    return df.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
+
+
+def _detectar_tipo_default(df: pd.DataFrame) -> str:
+    """
+    Heurística simples para sugerir tipo de carta quando 'Automático' é escolhido.
+    - Se houver coluna 'defeituosos' + 'inspecionados' → P-Chart
+    - Se houver 'defeitos' + 'oportunidades' → U-Chart
+    - Caso contrário → I-MR
+    """
+    cols = [c.lower() for c in df.columns]
+
+    if ("defeituosos" in cols or "defeituosos_qtd" in cols) and (
+        "inspecionados" in cols or "inspecionados_qtd" in cols
+    ):
+        return "P-Chart (Proporção defeituosos)"
+
+    if ("defeitos" in cols or "defeitos_qtd" in cols) and (
+        "oportunidades" in cols or "oportunidades_qtd" in cols
+    ):
+        return "U-Chart (Defeitos por unidade)"
+
+    # Default seguro
+    return "I-MR (Individuais)"
+
+
 def fase_controlar(df: pd.DataFrame) -> None:
     st.header("Fase Controlar — Acompanhar o Processo ao Longo do Tempo")
 
-    tipo_carta = st.selectbox(
-        "Tipo de carta de controle",
-        [
-            "Automático (recomendado)",
-            "I-MR (Individuais)",
-            "X̄-R (Subgrupos)",
-            "P-Chart (Proporção defeituosos)",
-            "U-Chart (Defeitos por unidade)",
-        ],
-    )
+    opcoes = [
+        "Automático (recomendado)",
+        "I-MR (Individuais)",
+        "X̄-R (Subgrupos)",
+        "P-Chart (Proporção defeituosos)",
+        "U-Chart (Defeitos por unidade)",
+    ]
 
-    num_cols = df.select_dtypes(include=["number"]).columns.tolist()
+    tipo_carta = st.selectbox("Tipo de carta de controle", opcoes)
 
-    if tipo_carta in ["Automático (recomendado)", "I-MR (Individuais)", "X̄-R (Subgrupos)"]:
+    # Se o usuário escolheu automático, definimos a sugestão
+    if tipo_carta == "Automático (recomendado)":
+        sugestao = _detectar_tipo_default(df)
+        st.info(f"Sugestão automática baseada na estrutura dos dados: **{sugestao}**")
+        tipo_carta = sugestao
+
+    num_cols = _colunas_numericas(df)
+
+    # ------------------------------------------------------------------
+    # I-MR e X̄-R
+    # ------------------------------------------------------------------
+    if tipo_carta in ["I-MR (Individuais)", "X̄-R (Subgrupos)"]:
         if not num_cols:
-            st.warning("Nenhuma coluna numérica disponível para cartas I-MR/X̄-R.")
+            st.warning("Nenhuma coluna numérica disponível para cartas de controle contínuas.")
             return
 
         indicador = st.selectbox("Selecione o indicador numérico", num_cols)
 
-    # ------------------------------
-    # Automático = I-MR simples por enquanto
-    # ------------------------------
-    if tipo_carta == "Automático (recomendado)":
-        st.info("Modo automático: utilizando Carta I-MR para dados individuais.")
-        try:
-            fig, resumo = carta_imr(df[indicador])
-            st.pyplot(fig)
-            plt.close(fig)
-            st.markdown(narrativa_imr(resumo))
-        except Exception as e:
-            st.error(f"Erro ao gerar carta I-MR: {e}")
+        if tipo_carta == "I-MR (Individuais)":
+            try:
+                fig, resumo = carta_imr(df[indicador])
+                st.pyplot(fig)
+                plt.close(fig)
+                st.markdown(narrativa_imr(indicador, resumo))
+            except Exception as e:
+                st.error(f"Erro ao gerar carta I-MR: {e}")
 
-    # ------------------------------
-    # I-MR
-    # ------------------------------
-    elif tipo_carta == "I-MR (Individuais)":
-        try:
-            fig, resumo = carta_imr(df[indicador])
-            st.pyplot(fig)
-            plt.close(fig)
-            st.markdown(narrativa_imr(resumo))
-        except Exception as e:
-            st.error(f"Erro ao gerar carta I-MR: {e}")
+        else:  # X̄-R
+            n_sub = st.number_input(
+                "Tamanho do subgrupo (2 a 6)",
+                min_value=2,
+                max_value=6,
+                value=5,
+                step=1,
+            )
+            try:
+                fig, resumo = carta_xbar_r(df[indicador], int(n_sub))
+                st.pyplot(fig)
+                plt.close(fig)
+                st.markdown(narrativa_xbar_r(indicador, resumo))
+            except Exception as e:
+                st.error(f"Erro ao gerar carta X̄-R: {e}")
 
-    # ------------------------------
-    # XBAR-R
-    # ------------------------------
-    elif tipo_carta == "X̄-R (Subgrupos)":
-        n_sub = st.number_input("Tamanho do subgrupo", min_value=2, max_value=6, value=5, step=1)
-        try:
-            fig, resumo = carta_xbar_r(df[indicador], int(n_sub))
-            st.pyplot(fig)
-            plt.close(fig)
-            st.markdown(narrativa_xbar_r(resumo))
-        except Exception as e:
-            st.error(f"Erro ao gerar carta X̄-R: {e}")
+        return
 
-    # ------------------------------
+    # ------------------------------------------------------------------
     # P-CHART
-    # ------------------------------
-    elif tipo_carta == "P-Chart (Proporção defeituosos)":
-        st.info("Informe colunas de número de itens defeituosos e total inspecionado em cada amostra.")
-
+    # ------------------------------------------------------------------
+    if tipo_carta == "P-Chart (Proporção defeituosos)":
         if not num_cols:
             st.warning("Não há colunas numéricas suficientes para carta P.")
             return
 
-        col_def = st.selectbox("Itens defeituosos", num_cols)
-        col_tot = st.selectbox("Total inspecionado", [c for c in num_cols if c != col_def])
+        col_def = st.selectbox("Número de defeituosos", num_cols)
+        col_tot = st.selectbox(
+            "Total inspecionado",
+            [c for c in num_cols if c != col_def],
+        )
 
         try:
             fig, resumo = carta_p(df[col_def], df[col_tot])
             st.pyplot(fig)
             plt.close(fig)
-            st.markdown(narrativa_p(resumo))
+            st.markdown(narrativa_p(col_def, col_tot, resumo))
         except Exception as e:
             st.error(f"Erro ao gerar carta P: {e}")
 
-    # ------------------------------
-    # U-CHART
-    # ------------------------------
-    elif tipo_carta == "U-Chart (Defeitos por unidade)":
-        st.info("Informe colunas de número de defeitos e unidades de oportunidade em cada amostra.")
+        return
 
+    # ------------------------------------------------------------------
+    # U-CHART
+    # ------------------------------------------------------------------
+    if tipo_carta == "U-Chart (Defeitos por unidade)":
         if not num_cols:
             st.warning("Não há colunas numéricas suficientes para carta U.")
             return
 
         col_def = st.selectbox("Número de defeitos", num_cols)
-        col_opp = st.selectbox("Unidades de oportunidade", [c for c in num_cols if c != col_def])
+        col_opp = st.selectbox(
+            "Unidades de oportunidade",
+            [c for c in num_cols if c != col_def],
+        )
 
         try:
             fig, resumo = carta_u(df[col_def], df[col_opp])
             st.pyplot(fig)
             plt.close(fig)
-            st.markdown(narrativa_u(resumo))
+            st.markdown(narrativa_u(col_def, col_opp, resumo))
         except Exception as e:
             st.error(f"Erro ao gerar carta U: {e}")
+
+        return

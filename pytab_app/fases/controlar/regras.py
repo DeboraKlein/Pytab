@@ -4,54 +4,69 @@ import pandas as pd
 
 def regra_ponto_fora_limite(valores, lcl, ucl):
     """
-    Regra 1: pontos fora de LCL/UCL.
-    Retorna DataFrame com índices e valores violados.
+    Regra 1: pontos fora dos limites de controle (LCL/UCL).
+
+    Retorna DataFrame com:
+      - index
+      - valor
+      - regra
     """
     valores = pd.Series(valores)
-    mask = (valores > ucl) | (valores < lcl)
+
+    # lcl / ucl podem ser escalares ou vetores
+    if np.ndim(lcl):
+        lcl_s = np.asarray(lcl)
+    else:
+        lcl_s = np.full_like(valores, lcl, dtype=float)
+
+    if np.ndim(ucl):
+        ucl_s = np.asarray(ucl)
+    else:
+        ucl_s = np.full_like(valores, ucl, dtype=float)
+
+    mask = (valores > ucl_s) | (valores < lcl_s)
     viol = valores[mask]
-    df = pd.DataFrame({"index": viol.index, "valor": viol.values})
-    df["regra"] = "Ponto fora dos limites (Regra 1)"
+
+    if viol.empty:
+        return pd.DataFrame(columns=["index", "valor", "regra"])
+
+    df = pd.DataFrame(
+        {
+            "index": viol.index,
+            "valor": viol.values,
+            "regra": ["Ponto fora dos limites (Regra 1)"] * len(viol),
+        }
+    )
     return df
 
 
-def regra_tendencia(valores, n_seq=6):
+def regra_tendencia(valores, n_seq: int = 6):
     """
-    Regra de tendência: n_seq pontos sempre subindo ou sempre descendo.
+    Regra 2: tendência – N pontos consecutivos subindo ou descendo.
     """
-    valores = pd.Series(valores).reset_index(drop=True)
-    diffs = np.diff(valores)
-
-    up = diffs > 0
-    down = diffs < 0
+    valores = pd.Series(valores).astype(float)
+    diffs = np.sign(np.diff(valores))
 
     violacoes = []
+    count = 1
+    direcao_atual = 0
 
-    # sequência de subida
-    count = 0
-    start = 0
-    for i, flag in enumerate(up):
-        if flag:
-            if count == 0:
-                start = i
-            count += 1
-            if count >= n_seq:
-                violacoes.append((start, i + 1, "Tendência de subida (Regra 2)"))
-        else:
-            count = 0
+    for i in range(1, len(valores)):
+        if diffs[i - 1] == 0:
+            count = 1
+            direcao_atual = 0
+            continue
 
-    # sequência de descida
-    count = 0
-    start = 0
-    for i, flag in enumerate(down):
-        if flag:
-            if count == 0:
-                start = i
+        if diffs[i - 1] == direcao_atual:
             count += 1
-            if count >= n_seq:
-                violacoes.append((start, i + 1, "Tendência de descida (Regra 2)"))
         else:
-            count = 0
+            direcao_atual = diffs[i - 1]
+            count = 2  # (i-1, i)
+
+        if count >= n_seq:
+            inicio = i - n_seq + 1
+            fim = i
+            violacoes.append((inicio, fim, "Tendência (Regra 2)"))
 
     if not violacoes:
         return pd.DataFrame(columns=["inicio", "fim", "regra"])
@@ -59,18 +74,18 @@ def regra_tendencia(valores, n_seq=6):
     return pd.DataFrame(violacoes, columns=["inicio", "fim", "regra"])
 
 
-def regra_lado_media(valores, n_seq=8):
+def regra_lado_media(valores, n_seq: int = 8):
     """
-    Regra: n_seq pontos consecutivos acima ou abaixo da média.
+    Regra 3: N pontos consecutivos do mesmo lado da média.
     """
-    valores = pd.Series(valores)
+    valores = pd.Series(valores).astype(float)
     media = valores.mean()
     acima = valores > media
     abaixo = valores < media
 
     violacoes = []
 
-    # acima
+    # Sequência acima da média
     count = 0
     start = 0
     for i, flag in enumerate(acima):
@@ -83,7 +98,7 @@ def regra_lado_media(valores, n_seq=8):
         else:
             count = 0
 
-    # abaixo
+    # Sequência abaixo da média
     count = 0
     start = 0
     for i, flag in enumerate(abaixo):
