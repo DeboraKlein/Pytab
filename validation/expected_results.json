@@ -1,25 +1,222 @@
 {
     "t_test_one_sample.csv": {
-        "mean": 25.4,
-        "std": 2.91,
-        "n": 15,
-        "t_stat": 2.12,
-        "p_value": 0.047
+        "type": "t_test_one_sample",
+        "column": "Value",
+        "mu0": 50.0,
+        "n": 120,
+        "mean": 48.95885488070122,
+        "std": 10.628183694882019,
+        "t_stat": -1.073106532306094,
+        "p_value": 0.2853946119088915
     },
-
-    "anova_example.csv": {
-        "group_means": {
-            "A": 10.2,
-            "B": 13.5,
-            "C": 15.1
+    "t_test_two_samples.csv": {
+        "type": "t_test_two_samples",
+        "value_column": "Value",
+        "group_column": "Group",
+        "groups": [
+            "A",
+            "B"
+        ],
+        "group_stats": {
+            "A": {
+                "n": 80,
+                "mean": 59.40721313740836,
+                "std": 7.931537066867746
+            },
+            "B": {
+                "n": 75,
+                "mean": 64.68793169930713,
+                "std": 7.761970154292536
+            }
         },
-        "f_stat": 5.12,
-        "p_value": 0.013
+        "t_stat": -4.188310197999909,
+        "p_value": 4.734127690269643e-05
     },
-
-    "regression_example.csv": {
-        "slope": 1.88,
-        "intercept": 290.1,
-        "r2": 0.8032
+    "t_test_paired.csv": {
+        "type": "t_test_paired",
+        "before_column": "Before",
+        "after_column": "After",
+        "n": 60,
+        "mean_before": 100.46477504132476,
+        "mean_after": 95.00660180043927,
+        "diff_mean": -5.458173240885494,
+        "t_stat": 14.016300337622843,
+        "p_value": 1.9672568041446347e-20
+    },
+    "anova_dataset.csv": {
+        "type": "anova_oneway",
+        "numeric_column": "Value",
+        "category_column": "Group",
+        "group_means": {
+            "G1": 49.598448031483215,
+            "G2": 55.997479391133766,
+            "G3": 59.31245343914105
+        },
+        "f_stat": 39.33243419044912,
+        "p_value": 8.61729357376662e-14
+    },
+    "chi_square_dataset.csv": {
+        "type": "chi_square_independence",
+        "row_var": "Machine",
+        "col_var": "Defect",
+        "chi2": 0.0,
+        "p_value": 1.0,
+        "dof": 2,
+        "table": {
+            "No": {
+                "M1": 23,
+                "M2": 23,
+                "M3": 23
+            },
+            "Yes": {
+                "M1": 17,
+                "M2": 17,
+                "M3": 17
+            }
+        }
+    },
+    "correlation_dataset.csv": {
+        "type": "correlation_matrix",
+        "columns": [
+            "X",
+            "Y",
+            "Z"
+        ],
+        "corr_matrix": {
+            "X": {
+                "X": 1.0,
+                "Y": 0.9279540397049051,
+                "Z": -0.05342805974093002
+            },
+            "Y": {
+                "X": 0.9279540397049051,
+                "Y": 1.0,
+                "Z": -0.08269685796335619
+            },
+            "Z": {
+                "X": -0.05342805974093002,
+                "Y": -0.08269685796335619,
+                "Z": 1.0
+            }
+        }
+    },
+    "regression_dataset.csv": {
+        "type": "regression_linear_simple",
+        "x": "X",
+        "y": "Y",
+        "slope": 3.024852948852316,
+        "intercept": 38.461610053290954,
+        "r2": 0.9860641355606787
+    },
+    "normality_dataset.csv": {
+        "type": "normality_shapiro",
+        "column": "Value",
+        "w_stat": 0.9971717915091215,
+        "p_value": 0.8828095592153917
+    },
+    "outliers_dataset.csv": {
+        "type": "outliers",
+        "column": "Value",
+        "mean": 102.19425714392698,
+        "std": 12.546734779573288,
+        "q1": 96.75304153128128,
+        "q3": 104.15354925248045,
+        "iqr": 7.400507721199162,
+        "lower_iqr_bound": 85.65227994948253,
+        "upper_iqr_bound": 115.25431083427918,
+        "mad": 3.713705147216288,
+        "zscore_threshold": 3.0,
+        "zscore_outlier_indices": [
+            180,
+            181,
+            182,
+            183,
+            184
+        ],
+        "iqr_outlier_indices": [
+            180,
+            181,
+            182,
+            183,
+            184
+        ]
+    },
+    "imr_dataset.csv": {
+        "type": "imr_chart",
+        "column": "Value",
+        "n": 200,
+        "mean": 99.79614517413957,
+        "sigma_est": 4.869640492701137,
+        "mr_bar": 5.492954475766882,
+        "ucl_x": 114.40506665224298,
+        "lcl_x": 85.18722369603616
+    },
+    "xbar_r_dataset.csv": {
+        "type": "xbar_r_chart",
+        "group_column": "Group",
+        "value_column": "Value",
+        "subgroup_size": 5,
+        "xbar_bar": 10.171736373797753,
+        "r_bar": 4.492369955508704,
+        "ucl_xbar": 12.763833838126274,
+        "lcl_xbar": 7.579638909469231,
+        "ucl_r": 9.4968700859454,
+        "lcl_r": 0.0
+    },
+    "p_chart_dataset.csv": {
+        "type": "p_chart",
+        "total_column": "Total",
+        "defectives_column": "Defectives",
+        "p_bar": 0.04413794353989817
+    },
+    "u_chart_dataset.csv": {
+        "type": "u_chart",
+        "column": "Defects",
+        "u_bar": 2.683333333333333
+    },
+    "mixed_dataset.csv": {
+        "type": "mixed",
+        "numeric_columns": [
+            "Revenue",
+            "Profit",
+            "Defects"
+        ],
+        "descriptive": {
+            "Revenue": {
+                "mean": 998.285255161139,
+                "std": 188.92137579204444,
+                "min": 463.0423905765016,
+                "max": 1443.8402543923555
+            },
+            "Profit": {
+                "mean": 200.82464499631317,
+                "std": 50.09873583557555,
+                "min": 33.762214004445184,
+                "max": 353.09734827031093
+            },
+            "Defects": {
+                "mean": 2.78,
+                "std": 1.6719981726805913,
+                "min": 0.0,
+                "max": 10.0
+            }
+        },
+        "correlation": {
+            "Revenue": {
+                "Revenue": 1.0,
+                "Profit": -0.0840860265061449,
+                "Defects": -0.0050563916949224715
+            },
+            "Profit": {
+                "Revenue": -0.0840860265061449,
+                "Profit": 1.0,
+                "Defects": -0.13557256525268993
+            },
+            "Defects": {
+                "Revenue": -0.0050563916949224715,
+                "Profit": -0.13557256525268993,
+                "Defects": 1.0
+            }
+        }
     }
 }

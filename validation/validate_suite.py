@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-from pytab.modules.testes_estatisticos import (
+from pytab_app.modules.testes_estatisticos import (
     teste_t_uma_amostra,
     anova_oneway,
     regressao_linear_simples
@@ -68,7 +68,7 @@ def validate_regression(df, expected, x, y):
 
 def run_all_validations():
     print("\n===============================")
-    print("  VALIDANDO PyTab × Minitab")
+    print("  VALIDANDO PyTab x Minitab")
     print("===============================\n")
 
     final_report = {}

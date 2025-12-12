@@ -1,1 +1,1 @@
-from .controlar. import fase_controlar
+from .controlar import fase_controlar
