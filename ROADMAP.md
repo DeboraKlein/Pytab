@@ -6,8 +6,6 @@
 
 ---
 
-# 4) `ROADMAP.md`
-
 
 # ROADMAP PyTab
 

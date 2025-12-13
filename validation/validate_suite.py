@@ -1,115 +1,151 @@
 import json
-import numpy as np
-import pandas as pd
+import math
 from pathlib import Path
+
+import pandas as pd
+
+# ================================
+# IMPORTS DO PYTAB (REAIS)
+# ================================
 
 from pytab_app.modules.testes_estatisticos import (
     teste_t_uma_amostra,
+    teste_t_duas_amostras,
+    teste_t_pareado,
     anova_oneway,
-    regressao_linear_simples
+    teste_quiquadrado,
+    teste_normalidade,
 )
 
-TOL = 0.005  # tolerância percentual 0.5%
+from pytab_app.fases.analisar.regressao import regressao_linear_simples
+from pytab_app.fases.analisar.correlacao import analisar_correlacao
 
-BASE_DIR = Path(__file__).resolve().parent
-EXPECTED = json.loads((BASE_DIR / "expected_results.json").read_text())
+# ================================
+# CONFIG
+# ================================
 
+BASE_DIR = Path(__file__).parent
+DATASETS_DIR = BASE_DIR / "datasets"
+EXPECTED_PATH = BASE_DIR / "expected_results.json"
+REPORT_PATH = BASE_DIR / "validation_report.json"
 
-def pct_diff(a, b):
-    """Diferença percentual absoluta."""
-    if a == 0 and b == 0:
-        return 0
-    return abs(a - b) / (abs(b) + 1e-9)
-
-
-def validate_value(calc, expected, label, results):
-    diff = pct_diff(calc, expected)
-
-    passed = diff <= TOL
-    results.append({
-        "metric": label,
-        "calculated": float(calc),
-        "expected": float(expected),
-        "pct_diff": float(diff),
-        "status": "PASS" if passed else "FAIL"
-    })
+TOL = 1e-3  # tolerância numérica aceitável
 
 
-def validate_t_test(data, expected):
-    results = []
-    res = teste_t_uma_amostra(data, expected["mean"])
+# ================================
+# FUNÇÕES AUXILIARES
+# ================================
 
-    validate_value(res["t_stat"], expected["t_stat"], "t_stat", results)
-    validate_value(res["p_value"], expected["p_value"], "p_value", results)
-
-    return results
+def close(a, b, tol=TOL):
+    return abs(a - b) <= tol
 
 
-def validate_anova(df, expected, numerica, categoria):
-    results = []
-    res = anova_oneway(df, numerica, categoria)
-
-    validate_value(res["anova"]["F"][0], expected["f_stat"], "f_stat", results)
-    validate_value(res["anova"]["PR(>F)"][0], expected["p_value"], "p_value", results)
-
-    return results
+def pass_fail(a, b):
+    return "PASS" if close(a, b) else "FAIL"
 
 
-def validate_regression(df, expected, x, y):
-    results = []
-    res = regressao_linear_simples(df[x], df[y])
+# ================================
+# VALIDAÇÕES
+# ================================
 
-    validate_value(res["slope"], expected["slope"], "slope", results)
-    validate_value(res["intercept"], expected["intercept"], "intercept", results)
-    validate_value(res["r2"], expected["r2"], "r2", results)
+def validate_t_test_one_sample(df, expected):
+    col = expected["column"]
+    mu0 = expected["mu0"]
 
-    return results
+    res = teste_t_uma_amostra(df[col], mu0)
+
+    return {
+        "mean": pass_fail(res["mean"], expected["mean"]),
+        "t_stat": pass_fail(res["t_stat"], expected["t_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+    }
 
 
-def run_all_validations():
-    print("\n===============================")
-    print("  VALIDANDO PyTab x Minitab")
-    print("===============================\n")
+def validate_t_test_two_samples(df, expected):
+    num = expected["value_column"]
+    cat = expected["group_column"]
 
-    final_report = {}
+    g = df[cat].unique()
+    g1 = df[df[cat] == g[0]][num]
+    g2 = df[df[cat] == g[1]][num]
 
-    for filename, exp in EXPECTED.items():
-        print(f"\n--- Dataset: {filename} ---")
+    res = teste_t_duas_amostras(g1, g2)
 
-        df = pd.read_csv(BASE_DIR / filename)
-        report = []
+    return {
+        "t_stat": pass_fail(res["t_stat"], expected["t_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+    }
 
-        # Decide automaticamente o tipo de teste baseado no expected_results.json
-        if "t_stat" in exp:
-            report = validate_t_test(df.iloc[:, 0], exp)
 
-        elif "f_stat" in exp:
-            # ANOVA – detectar numérica e categórica automaticamente
-            numerica = df.select_dtypes(include=["number"]).columns[0]
-            categoria = df.select_dtypes(include=["object", "category"]).columns[0]
-            report = validate_anova(df, exp, numerica, categoria)
+def validate_anova(df, expected):
+    res = anova_oneway(df, expected["numeric_column"], expected["category_column"])
 
-        elif "slope" in exp:
-            # Regressão
-            cols = df.columns
-            report = validate_regression(df, exp, cols[0], cols[1])
+    return {
+        "f_stat": pass_fail(res["f_stat"], expected["f_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+    }
+
+
+def validate_regression(df, expected):
+    res = regressao_linear_simples(df, expected["x"], expected["y"])
+
+    return {
+        "slope": pass_fail(res["coef_angular"], expected["slope"]),
+        "intercept": pass_fail(res["intercepto"], expected["intercept"]),
+        "r2": pass_fail(res["r2"], expected["r2"]),
+    }
+
+
+def validate_correlation(df, expected):
+    corr = analisar_correlacao(df)["corr"]
+
+    out = {}
+    for (a, b), val in expected["pairs"].items():
+        out[f"{a}~{b}"] = pass_fail(corr.loc[a, b], val)
+
+    return out
+
+
+# ================================
+# MAIN
+# ================================
+
+def main():
+    with open(EXPECTED_PATH) as f:
+        expected_all = json.load(f)
+
+    report = {}
+
+    for fname, expected in expected_all.items():
+        csv_path = DATASETS_DIR / fname
+        df = pd.read_csv(csv_path)
+
+        tipo = expected["type"]
+
+        if tipo == "t_test_one_sample":
+            report[fname] = validate_t_test_one_sample(df, expected)
+
+        elif tipo == "t_test_two_samples":
+            report[fname] = validate_t_test_two_samples(df, expected)
+
+        elif tipo == "anova_oneway":
+            report[fname] = validate_anova(df, expected)
+
+        elif tipo == "regression_linear_simple":
+            report[fname] = validate_regression(df, expected)
+
+        elif tipo == "correlation":
+            report[fname] = validate_correlation(df, expected)
 
         else:
-            report.append({"status": "UNKNOWN TEST TYPE"})
+            report[fname] = {"status": "SKIPPED", "reason": "Tipo não implementado"}
 
-        final_report[filename] = report
+    with open(REPORT_PATH, "w") as f:
+        json.dump(report, f, indent=4)
 
-        # Imprime no console
-        for r in report:
-            print(f"{r['metric']:12} | PyTab={r['calculated']:.4f} | "
-                  f"Min={r['expected']:.4f} | diff={r['pct_diff']:.3%} "
-                  f"| {r['status']}")
-
-    # Salvar resultado consolidado
-    outpath = BASE_DIR / "validation_report.json"
-    outpath.write_text(json.dumps(final_report, indent=4))
-    print(f"\nRelatório salvo em: {outpath}")
+    print("Validação concluída.")
+    print(f"Relatório salvo em: {REPORT_PATH}")
 
 
 if __name__ == "__main__":
-    run_all_validations()
+    main()
