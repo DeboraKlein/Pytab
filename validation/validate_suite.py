@@ -17,8 +17,8 @@ from pytab_app.modules.testes_estatisticos import (
     teste_normalidade,
 )
 
-from pytab_app.fases.analisar.regressao import regressao_linear_simples
-from pytab_app.fases.analisar.correlacao import analisar_correlacao
+from pytab_app.fases.analisar.regressao import analisar_regressao
+from pytab_app.fases.analisar.correlacao import calcular_correlacao
 
 # ================================
 # CONFIG
@@ -55,10 +55,18 @@ def validate_t_test_one_sample(df, expected):
     res = teste_t_uma_amostra(df[col], mu0)
 
     return {
-        "mean": pass_fail(res["mean"], expected["mean"]),
-        "t_stat": pass_fail(res["t_stat"], expected["t_stat"]),
-        "p_value": pass_fail(res["p_value"], expected["p_value"]),
-    }
+    "media_observada": pass_fail(
+        res["media_observada"], expected["media_observada"]
+    ),
+    "t_stat": pass_fail(
+        res["t_stat"], expected["t_stat"]
+    ),
+    "p_value": pass_fail(
+        res["p_value"], expected["p_value"]
+    ),
+}
+
+
 
 
 def validate_t_test_two_samples(df, expected):

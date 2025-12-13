@@ -12,16 +12,31 @@ from pytab.charts.theme import PRIMARY, SECONDARY
 # 1) TESTES t
 # ============================================================
 
-def teste_t_uma_amostra(serie: pd.Series, media_hipotetica: float) -> dict:
+
+def teste_t_uma_amostra(serie, mu0: float):
+    """
+    Teste t de uma amostra.
+    H0: média = mu0
+    """
+
     serie = serie.dropna()
-    t_stat, p = stats.ttest_1samp(serie, media_hipotetica)
+    n = len(serie)
+
+    mean = float(np.mean(serie))
+    std = float(np.std(serie, ddof=1))  # desvio padrão amostral
+
+    t_stat, p_value = stats.ttest_1samp(serie, popmean=mu0)
+
     return {
-        "media": float(serie.mean()),
-        "hipotese": media_hipotetica,
-        "t": float(t_stat),
-        "p": float(p),
-        "n": int(serie.shape[0]),
+        "teste": "t_test_one_sample",
+        "n": n,
+        "mu0": float(mu0),
+        "mean": mean,
+        "std": std,
+        "t_stat": float(t_stat),
+        "p_value": float(p_value),
     }
+
 
 
 def teste_t_duas_amostras(
