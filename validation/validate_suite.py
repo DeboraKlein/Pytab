@@ -49,22 +49,23 @@ def pass_fail(a, b):
 # ================================
 
 def validate_t_test_one_sample(df, expected):
+    from pytab_app.modules.testes_estatisticos import teste_t_uma_amostra
+
     col = expected["column"]
     mu0 = expected["mu0"]
 
     res = teste_t_uma_amostra(df[col], mu0)
 
+    def pass_fail(valor, esperado, tol=1e-6):
+        return "PASS" if abs(valor - esperado) <= tol else "FAIL"
+
     return {
-    "media_observada": pass_fail(
-        res["media_observada"], expected["media_observada"]
-    ),
-    "t_stat": pass_fail(
-        res["t_stat"], expected["t_stat"]
-    ),
-    "p_value": pass_fail(
-        res["p_value"], expected["p_value"]
-    ),
-}
+        "mean": pass_fail(res["mean"], expected["mean"]),
+        "std": pass_fail(res["std"], expected["std"]),
+        "t_stat": pass_fail(res["t_stat"], expected["t_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+    }
+
 
 
 
