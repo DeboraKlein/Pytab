@@ -2,7 +2,6 @@
 ---
 .
 
-```markdown
 # GLOSSÁRIO PyTab
 
 Termos essenciais usados no PyTab e em Lean Six Sigma.
