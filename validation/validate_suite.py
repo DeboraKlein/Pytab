@@ -49,15 +49,10 @@ def pass_fail(a, b):
 # ================================
 
 def validate_t_test_one_sample(df, expected):
-    from pytab_app.modules.testes_estatisticos import teste_t_uma_amostra
-
     col = expected["column"]
     mu0 = expected["mu0"]
 
     res = teste_t_uma_amostra(df[col], mu0)
-
-    def pass_fail(valor, esperado, tol=1e-6):
-        return "PASS" if abs(valor - esperado) <= tol else "FAIL"
 
     return {
         "mean": pass_fail(res["mean"], expected["mean"]),
@@ -70,13 +65,14 @@ def validate_t_test_one_sample(df, expected):
 
 
 
+
 def validate_t_test_two_samples(df, expected):
     num = expected["value_column"]
     cat = expected["group_column"]
 
-    g = df[cat].unique()
-    g1 = df[df[cat] == g[0]][num]
-    g2 = df[df[cat] == g[1]][num]
+    grupos = df[cat].dropna().unique()
+    g1 = df[df[cat] == grupos[0]][num]
+    g2 = df[df[cat] == grupos[1]][num]
 
     res = teste_t_duas_amostras(g1, g2)
 
@@ -86,13 +82,19 @@ def validate_t_test_two_samples(df, expected):
     }
 
 
+
 def validate_anova(df, expected):
-    res = anova_oneway(df, expected["numeric_column"], expected["category_column"])
+    res = anova_oneway(
+        df,
+        numerica=expected["value_column"],
+        categoria=expected["group_column"]
+    )
 
     return {
         "f_stat": pass_fail(res["f_stat"], expected["f_stat"]),
         "p_value": pass_fail(res["p_value"], expected["p_value"]),
     }
+
 
 
 def validate_regression(df, expected):

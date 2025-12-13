@@ -13,27 +13,22 @@ from pytab.charts.theme import PRIMARY, SECONDARY
 # ============================================================
 
 
-def teste_t_uma_amostra(serie, mu0: float):
-    """
-    Teste t de uma amostra.
-    H0: média = mu0
-    """
-
+def teste_t_uma_amostra(serie: pd.Series, mu0: float) -> dict:
     serie = serie.dropna()
-    n = len(serie)
+    n = int(len(serie))
 
-    mean = float(np.mean(serie))
-    std = float(np.std(serie, ddof=1))  # desvio padrão amostral
+    mean = float(serie.mean())
+    std = float(serie.std(ddof=1))
 
     t_stat, p_value = stats.ttest_1samp(serie, popmean=mu0)
 
     return {
         "teste": "t_test_one_sample",
         "n": n,
-        "mu0": float(mu0),
         "mean": mean,
         "std": std,
         "t_stat": float(t_stat),
+        "f_stat": None,
         "p_value": float(p_value),
     }
 
@@ -44,18 +39,21 @@ def teste_t_duas_amostras(
     grupo2: pd.Series,
     equal_var: bool = False,
 ) -> dict:
-    grupo1 = grupo1.dropna()
-    grupo2 = grupo2.dropna()
+    g1 = grupo1.dropna()
+    g2 = grupo2.dropna()
 
-    t_stat, p = stats.ttest_ind(grupo1, grupo2, equal_var=equal_var)
+    t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=equal_var)
+
     return {
-        "media1": float(grupo1.mean()),
-        "media2": float(grupo2.mean()),
-        "n1": int(grupo1.shape[0]),
-        "n2": int(grupo2.shape[0]),
-        "t": float(t_stat),
-        "p": float(p),
+        "teste": "t_test_two_samples",
+        "n": int(len(g1) + len(g2)),
+        "mean": float((g1.mean() + g2.mean()) / 2),
+        "std": float(pd.concat([g1, g2]).std(ddof=1)),
+        "t_stat": float(t_stat),
+        "f_stat": None,
+        "p_value": float(p_value),
     }
+
 
 
 def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
@@ -127,24 +125,28 @@ p-valor = **{p:.4f}**
 
 def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
     """
-    Executa ANOVA One-Way lidando com nomes de coluna com espaço.
-
-    Renomeia colunas para nomes seguros internamente e usa statsmodels.
+    ANOVA One-Way
+    H0: médias dos grupos são iguais
     """
-    dados = df[[numerica, categoria]].dropna()
 
-    if dados.empty:
-        raise ValueError("Não há dados suficientes para ANOVA.")
+    data = df[[numerica, categoria]].dropna()
+    n = int(len(data))
 
-    y_name = "y_var"
-    x_name = "x_cat"
-    dados_local = dados.rename(columns={numerica: y_name, categoria: x_name})
-
-    modelo = smf.ols(f"{y_name} ~ C({x_name})", data=dados_local).fit()
+    modelo = smf.ols(f"{numerica} ~ C({categoria})", data=data).fit()
     tabela = sm.stats.anova_lm(modelo, typ=2)
 
-    return {"anova": tabela, "modelo": modelo, "y": numerica, "x": categoria}
+    f_stat = float(tabela["F"].iloc[0])
+    p_value = float(tabela["PR(>F)"].iloc[0])
 
+    return {
+        "teste": "anova_oneway",
+        "n": n,
+        "mean": float(data[numerica].mean()),
+        "std": float(data[numerica].std(ddof=1)),
+        "t_stat": None,
+        "f_stat": f_stat,
+        "p_value": p_value,
+    }
 
 def narrativa_anova(resultado: dict) -> str:
     tabela = resultado["anova"]
