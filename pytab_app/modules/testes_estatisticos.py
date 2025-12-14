@@ -67,64 +67,44 @@ def _base_contract(
 
 def teste_t_uma_amostra(serie: pd.Series, mu0: float) -> dict:
     serie = serie.dropna()
-    n = int(len(serie))
+    n = len(serie)
 
-    mean = float(serie.mean()) if n else None
-    std = float(serie.std(ddof=1)) if n > 1 else None
+    mean = serie.mean()
+    std = serie.std(ddof=1)
 
-    t_stat, p_value = (np.nan, np.nan)
-    if n >= 2 and std is not None and np.isfinite(std) and std != 0:
-        t_stat, p_value = stats.ttest_1samp(serie, popmean=float(mu0))
+    t_stat, p_value = stats.ttest_1samp(serie, popmean=float(mu0))
 
-    return _base_contract(
-        teste="t_test_one_sample",
-        n=n,
-        mean=mean,
-        std=std,
-        t_stat=None if np.isnan(t_stat) else float(t_stat),
-        p_value=None if np.isnan(p_value) else float(p_value),
-        f_stat=None,
-        mu0=float(mu0),
-    )
+    return {
+        "teste": "t_test_one_sample",
+        "n": n,
+        "mean": float(mean),
+        "std": float(std),
+        "t_stat": float(t_stat),
+        "f_stat": None,
+        "p_value": float(p_value),
+    }
 
 
-def teste_t_duas_amostras(
-    grupo1: pd.Series,
-    grupo2: pd.Series,
-    equal_var: bool = False,
-) -> dict:
-    g1 = grupo1.dropna()
-    g2 = grupo2.dropna()
 
-    n1 = int(len(g1))
-    n2 = int(len(g2))
-    n = n1 + n2
+def teste_t_duas_amostras(g1: pd.Series, g2: pd.Series) -> dict:
+    g1 = g1.dropna()
+    g2 = g2.dropna()
 
-    mean1 = float(g1.mean()) if n1 else None
-    mean2 = float(g2.mean()) if n2 else None
+    n = len(g1) + len(g2)
+    mean = float(pd.concat([g1, g2]).mean())
+    std = float(pd.concat([g1, g2]).std(ddof=1))
 
-    pooled = pd.concat([g1, g2], axis=0)
-    std = float(pooled.std(ddof=1)) if n > 1 else None
-    mean = float(pooled.mean()) if n else None
+    t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=False)
 
-    t_stat, p_value = (np.nan, np.nan)
-    if n1 >= 2 and n2 >= 2:
-        t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=bool(equal_var))
-
-    return _base_contract(
-        teste="t_test_two_samples",
-        n=n,
-        mean=mean,
-        std=std,
-        t_stat=None if np.isnan(t_stat) else float(t_stat),
-        p_value=None if np.isnan(p_value) else float(p_value),
-        f_stat=None,
-        n1=n1,
-        n2=n2,
-        mean1=mean1,
-        mean2=mean2,
-        equal_var=bool(equal_var),
-    )
+    return {
+        "teste": "t_test_two_samples",
+        "n": n,
+        "mean": mean,
+        "std": std,
+        "t_stat": float(t_stat),
+        "f_stat": None,
+        "p_value": float(p_value),
+    }
 
 
 def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:

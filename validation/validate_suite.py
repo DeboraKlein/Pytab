@@ -77,18 +77,26 @@ def validate_t_test_two_samples(df, expected):
     }
 
 
+def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
+    data = df[[numerica, categoria]].dropna()
 
-def validate_anova(df, expected):
-    res = anova_oneway(
-        df,
-        numerica=expected["numeric_column"],
-        categoria=expected["category_column"]
-    )
+    modelo = smf.ols(f"`{numerica}` ~ C(`{categoria}`)", data=data).fit()
+    tabela = sm.stats.anova_lm(modelo, typ=2)
+
+    f_stat = tabela["F"].iloc[0]
+    p_value = tabela["PR(>F)"].iloc[0]
 
     return {
-        "f_stat": pass_fail(res["f_stat"], expected["f_stat"]),
-        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+        "teste": "anova_oneway",
+        "n": int(len(data)),
+        "mean": float(data[numerica].mean()),
+        "std": float(data[numerica].std(ddof=1)),
+        "t_stat": None,
+        "f_stat": float(f_stat),
+        "p_value": float(p_value),
+        "anova": tabela,
     }
+
 
 
 
