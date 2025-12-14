@@ -144,7 +144,7 @@ def main():
             report[fname] = validate_t_test_two_samples(df, expected)
 
         elif tipo == "anova_oneway":
-            report[fname] = validate_anova(df, expected)
+            report[fname] = anova_oneway(df, expected)
 
         elif tipo == "regression_linear_simple":
             report[fname] = validate_regression(df, expected)
