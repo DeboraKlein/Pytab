@@ -45,8 +45,8 @@
     },
     "anova_dataset.csv": {
         "type": "anova_oneway",
-        "numeric_column": "Value",
-        "category_column": "Group",
+        "numeric_column": "value_column",
+        "category_column": "group_column",
         "group_means": {
             "G1": 49.598448031483215,
             "G2": 55.997479391133766,

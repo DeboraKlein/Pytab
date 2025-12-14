@@ -61,11 +61,6 @@ def validate_t_test_one_sample(df, expected):
         "p_value": pass_fail(res["p_value"], expected["p_value"]),
     }
 
-
-
-
-
-
 def validate_t_test_two_samples(df, expected):
     num = expected["value_column"]
     cat = expected["group_column"]
@@ -86,14 +81,15 @@ def validate_t_test_two_samples(df, expected):
 def validate_anova(df, expected):
     res = anova_oneway(
         df,
-        numerica=expected["value_column"],
-        categoria=expected["group_column"]
+        numerica=expected["numeric_column"],
+        categoria=expected["category_column"]
     )
 
     return {
         "f_stat": pass_fail(res["f_stat"], expected["f_stat"]),
         "p_value": pass_fail(res["p_value"], expected["p_value"]),
     }
+
 
 
 
