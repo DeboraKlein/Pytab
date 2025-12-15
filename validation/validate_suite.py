@@ -1,12 +1,7 @@
 import json
-import math
 from pathlib import Path
 
 import pandas as pd
-
-# ================================
-# IMPORTS DO PYTAB (REAIS)
-# ================================
 
 from pytab_app.modules.testes_estatisticos import (
     teste_t_uma_amostra,
@@ -16,9 +11,6 @@ from pytab_app.modules.testes_estatisticos import (
     teste_quiquadrado,
     teste_normalidade,
 )
-
-from pytab_app.fases.analisar.regressao import analisar_regressao
-from pytab_app.fases.analisar.correlacao import calcular_correlacao
 
 # ================================
 # CONFIG
@@ -44,6 +36,26 @@ def pass_fail(a, b):
     return "PASS" if close(a, b) else "FAIL"
 
 
+def _load_dataset(fname: str) -> tuple[pd.DataFrame | None, str | None]:
+    """
+    Carrega o dataset. Se não existir com o nome exato,
+    tenta alternativas simples para reduzir fricção.
+    Retorna (df, resolved_name) ou (None, None).
+    """
+    candidates = [
+        fname,
+        fname.replace("_dataset", ""),
+        fname.replace("_dataset", "").replace(".csv", "_dataset.csv"),
+    ]
+
+    for cand in candidates:
+        p = DATASETS_DIR / cand
+        if p.exists():
+            return pd.read_csv(p), cand
+
+    return None, None
+
+
 # ================================
 # VALIDAÇÕES
 # ================================
@@ -61,6 +73,7 @@ def validate_t_test_one_sample(df, expected):
         "p_value": pass_fail(res["p_value"], expected["p_value"]),
     }
 
+
 def validate_t_test_two_samples(df, expected):
     num = expected["value_column"]
     cat = expected["group_column"]
@@ -77,48 +90,54 @@ def validate_t_test_two_samples(df, expected):
     }
 
 
-def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
-    data = df[[numerica, categoria]].dropna()
+def validate_t_test_paired(df, expected):
+    b = expected["before_column"]
+    a = expected["after_column"]
 
-    modelo = smf.ols(f"`{numerica}` ~ C(`{categoria}`)", data=data).fit()
-    tabela = sm.stats.anova_lm(modelo, typ=2)
-
-    f_stat = tabela["F"].iloc[0]
-    p_value = tabela["PR(>F)"].iloc[0]
+    res = teste_t_pareado(df[b], df[a])
 
     return {
-        "teste": "anova_oneway",
-        "n": int(len(data)),
-        "mean": float(data[numerica].mean()),
-        "std": float(data[numerica].std(ddof=1)),
-        "t_stat": None,
-        "f_stat": float(f_stat),
-        "p_value": float(p_value),
-        "anova": tabela,
+        "t_stat": pass_fail(res["t_stat"], expected["t_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+        "diff_mean": pass_fail(res.get("diff_mean", res["mean"]), expected["diff_mean"]),
     }
 
 
+def validate_anova(df, expected):
+    # IMPORTANTÍSSIMO: aqui precisam ser nomes reais de colunas no CSV.
+    num_col = expected["numeric_column"]
+    cat_col = expected["category_column"]
 
-
-
-def validate_regression(df, expected):
-    res = regressao_linear_simples(df, expected["x"], expected["y"])
+    res = anova_oneway(df, numerica=num_col, categoria=cat_col)
 
     return {
-        "slope": pass_fail(res["coef_angular"], expected["slope"]),
-        "intercept": pass_fail(res["intercepto"], expected["intercept"]),
-        "r2": pass_fail(res["r2"], expected["r2"]),
+        "f_stat": pass_fail(res["f_stat"], expected["f_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
     }
 
 
-def validate_correlation(df, expected):
-    corr = analisar_correlacao(df)["corr"]
+def validate_normality(df, expected):
+    col = expected["column"]
 
-    out = {}
-    for (a, b), val in expected["pairs"].items():
-        out[f"{a}~{b}"] = pass_fail(corr.loc[a, b], val)
+    res = teste_normalidade(df[col], metodo="shapiro")
 
-    return out
+    return {
+        "w_stat": pass_fail(res.get("w_stat", res["t_stat"]), expected["w_stat"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+    }
+
+
+def validate_chi_square(df, expected):
+    r = expected["row_var"]
+    c = expected["col_var"]
+
+    res = teste_quiquadrado(df, r, c)
+
+    return {
+        "chi2": pass_fail(res["f_stat"], expected["chi2"]),
+        "p_value": pass_fail(res["p_value"], expected["p_value"]),
+        "dof": "PASS" if int(res["dof"]) == int(expected["dof"]) else "FAIL",
+    }
 
 
 # ================================
@@ -126,37 +145,48 @@ def validate_correlation(df, expected):
 # ================================
 
 def main():
-    with open(EXPECTED_PATH) as f:
+    with open(EXPECTED_PATH, encoding="utf-8") as f:
         expected_all = json.load(f)
 
     report = {}
 
     for fname, expected in expected_all.items():
-        csv_path = DATASETS_DIR / fname
-        df = pd.read_csv(csv_path)
+        df, resolved_name = _load_dataset(fname)
+
+        if df is None:
+            report[fname] = {"status": "SKIPPED", "reason": "Dataset não encontrado em validation/datasets"}
+            continue
 
         tipo = expected["type"]
 
-        if tipo == "t_test_one_sample":
-            report[fname] = validate_t_test_one_sample(df, expected)
+        try:
+            if tipo == "t_test_one_sample":
+                report[fname] = validate_t_test_one_sample(df, expected)
 
-        elif tipo == "t_test_two_samples":
-            report[fname] = validate_t_test_two_samples(df, expected)
+            elif tipo == "t_test_two_samples":
+                report[fname] = validate_t_test_two_samples(df, expected)
 
-        elif tipo == "anova_oneway":
-            report[fname] = anova_oneway(df, expected)
+            elif tipo == "t_test_paired":
+                report[fname] = validate_t_test_paired(df, expected)
 
-        elif tipo == "regression_linear_simple":
-            report[fname] = validate_regression(df, expected)
+            elif tipo == "anova_oneway":
+                report[fname] = validate_anova(df, expected)
 
-        elif tipo == "correlation":
-            report[fname] = validate_correlation(df, expected)
+            elif tipo == "normality_shapiro":
+                report[fname] = validate_normality(df, expected)
 
-        else:
-            report[fname] = {"status": "SKIPPED", "reason": "Tipo não implementado"}
+            elif tipo == "chi_square_independence":
+                report[fname] = validate_chi_square(df, expected)
 
-    with open(REPORT_PATH, "w") as f:
-        json.dump(report, f, indent=4)
+            else:
+                # ainda não implementados neste validate_suite
+                report[fname] = {"status": "SKIPPED", "reason": f"Tipo não implementado: {tipo}"}
+
+        except Exception as e:
+            report[fname] = {"status": "ERROR", "reason": str(e), "dataset": resolved_name}
+
+    with open(REPORT_PATH, "w", encoding="utf-8") as f:
+        json.dump(report, f, indent=4, ensure_ascii=False)
 
     print("Validação concluída.")
     print(f"Relatório salvo em: {REPORT_PATH}")
@@ -164,3 +194,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

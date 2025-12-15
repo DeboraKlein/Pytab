@@ -144,7 +144,11 @@ def fase_analisar(df: pd.DataFrame) -> None:
 
                 try:
                     res = anova_oneway(df, numcol, cat)
-                    st.write(res["anova"])
+                    # Mantém compatibilidade com o retorno atual:
+                    if "anova" in res:
+                        st.write(res["anova"])
+                    elif "anova_table" in res:
+                        st.write(res["anova_table"])
                     st.markdown(narrativa_anova(res))
                 except Exception as e:
                     st.error(f"Erro ao executar ANOVA: {e}")

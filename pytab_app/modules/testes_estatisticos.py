@@ -28,7 +28,6 @@ import statsmodels.formula.api as smf
 import plotly.graph_objects as go
 
 from patsy.builtins import Q  # lida com nomes de colunas com espaço/caracteres especiais
-
 from pytab.charts.theme import PRIMARY, SECONDARY
 
 
@@ -67,44 +66,62 @@ def _base_contract(
 
 def teste_t_uma_amostra(serie: pd.Series, mu0: float) -> dict:
     serie = serie.dropna()
-    n = len(serie)
+    n = int(len(serie))
 
-    mean = serie.mean()
-    std = serie.std(ddof=1)
+    mean = float(serie.mean()) if n else None
+    std = float(serie.std(ddof=1)) if n > 1 else None
 
-    t_stat, p_value = stats.ttest_1samp(serie, popmean=float(mu0))
+    t_stat, p_value = (np.nan, np.nan)
+    if n >= 2:
+        t_stat, p_value = stats.ttest_1samp(serie, popmean=float(mu0))
 
-    return {
-        "teste": "t_test_one_sample",
-        "n": n,
-        "mean": float(mean),
-        "std": float(std),
-        "t_stat": float(t_stat),
-        "f_stat": None,
-        "p_value": float(p_value),
-    }
-
+    return _base_contract(
+        teste="t_test_one_sample",
+        n=n,
+        mean=mean,
+        std=std,
+        t_stat=None if np.isnan(t_stat) else float(t_stat),
+        f_stat=None,
+        p_value=None if np.isnan(p_value) else float(p_value),
+        mu0=float(mu0),
+    )
 
 
 def teste_t_duas_amostras(g1: pd.Series, g2: pd.Series) -> dict:
     g1 = g1.dropna()
     g2 = g2.dropna()
 
-    n = len(g1) + len(g2)
-    mean = float(pd.concat([g1, g2]).mean())
-    std = float(pd.concat([g1, g2]).std(ddof=1))
+    n1 = int(len(g1))
+    n2 = int(len(g2))
+    n = n1 + n2
 
-    t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=False)
+    mean1 = float(g1.mean()) if n1 else None
+    mean2 = float(g2.mean()) if n2 else None
 
-    return {
-        "teste": "t_test_two_samples",
-        "n": n,
-        "mean": mean,
-        "std": std,
-        "t_stat": float(t_stat),
-        "f_stat": None,
-        "p_value": float(p_value),
-    }
+    pooled = pd.concat([g1, g2], axis=0)
+    mean = float(pooled.mean()) if n else None
+    std = float(pooled.std(ddof=1)) if n > 1 else None
+
+    t_stat, p_value = (np.nan, np.nan)
+    if n1 >= 2 and n2 >= 2:
+        t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=False)
+
+    # Mantém contrato base + adiciona campos que a narrativa espera
+    return _base_contract(
+        teste="t_test_two_samples",
+        n=n,
+        mean=mean,
+        std=std,
+        t_stat=None if np.isnan(t_stat) else float(t_stat),
+        f_stat=None,
+        p_value=None if np.isnan(p_value) else float(p_value),
+        n1=n1,
+        n2=n2,
+        mean1=mean1,
+        mean2=mean2,
+        std1=float(g1.std(ddof=1)) if n1 > 1 else None,
+        std2=float(g2.std(ddof=1)) if n2 > 1 else None,
+    )
 
 
 def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
@@ -123,6 +140,9 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
     if n >= 2:
         t_stat, p_value = stats.ttest_rel(g1, g2)
 
+    mean_before = float(g1.mean()) if n else None
+    mean_after = float(g2.mean()) if n else None
+
     return _base_contract(
         teste="t_test_paired",
         n=n,
@@ -131,8 +151,11 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
         t_stat=None if np.isnan(t_stat) else float(t_stat),
         p_value=None if np.isnan(p_value) else float(p_value),
         f_stat=None,
-        mean1=float(g1.mean()) if n else None,
-        mean2=float(g2.mean()) if n else None,
+        mean1=mean_before,
+        mean2=mean_after,
+        mean_before=mean_before,
+        mean_after=mean_after,
+        diff_mean=mean_dif,
     )
 
 
@@ -195,8 +218,6 @@ def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
     mean = float(data[numerica].mean()) if n else None
     std = float(data[numerica].std(ddof=1)) if n > 1 else None
 
-    # Formula segura (patsy Q)
-    # Ex.: Q("Unit Value") ~ C(Q("Team"))
     formula = f'{Q(numerica)} ~ C({Q(categoria)})'
 
     modelo = smf.ols(formula, data=data).fit()
@@ -305,20 +326,22 @@ def teste_normalidade(serie: pd.Series, metodo: str = "shapiro") -> dict:
             f_stat=None,
             p_value=None,
             metodo=str(metodo),
+            w_stat=None,
         )
 
-    # Por enquanto: Shapiro como padrão (robusto e popular no LSS)
     stat, p = stats.shapiro(serie)
 
+    # mantém compat com JSON (w_stat)
     return _base_contract(
         teste=f"normality_{metodo}",
         n=n,
         mean=mean,
         std=std,
-        t_stat=float(stat),   # usamos t_stat como "stat" geral
+        t_stat=float(stat),   # stat geral
         f_stat=None,
         p_value=float(p),
         metodo=str(metodo),
+        w_stat=float(stat),
     )
 
 

@@ -1,2 +1,3 @@
-from .analisar import fase_analisar  # noqa: F401
+from .analisar import fase_analisar
+
 
