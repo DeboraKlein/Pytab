@@ -35,6 +35,34 @@ from pytab.charts.theme import PRIMARY, SECONDARY
 # Helpers
 # ============================================================
 
+import numpy as np  # se já existir, ignore
+
+def _fmt_num_user(x: float | None, nd: int = 2) -> str:
+    if x is None:
+        return "-"
+    try:
+        x = float(x)
+    except Exception:
+        return "-"
+    if np.isnan(x):
+        return "-"
+    return f"{x:.{nd}f}".replace(".", ",")
+
+def _fmt_p_user(p: float | None) -> str:
+    """Sem notação científica; evita '0.0000'."""
+    if p is None:
+        return "-"
+    try:
+        p = float(p)
+    except Exception:
+        return "-"
+    if np.isnan(p):
+        return "-"
+    if p < 0.0001:
+        return "< 0,0001"
+    return f"{p:.4f}".replace(".", ",")
+
+
 def _base_contract(
     *,
     teste: str,
@@ -160,50 +188,93 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
 
 
 def narrativa_t(resultado: dict, tipo: str) -> str:
-    """Narrativas para Streamlit. Usa o contrato base + extras quando disponíveis."""
     p = resultado.get("p_value", None)
+    p_txt = _fmt_p_user(p)
 
-    conclusao = (
-        "Há evidência estatística de diferença (p < 0,05)."
-        if (p is not None and p < 0.05)
-        else "Não há evidência estatística de diferença significativa (p ≥ 0,05)."
-    )
+    if p is None or (isinstance(p, float) and np.isnan(p)):
+        conclusao = "Resultado indisponível (amostra insuficiente ou dados inválidos)."
+    else:
+        conclusao = (
+            "Há evidência estatística de diferença (p < 0,05)."
+            if p < 0.05
+            else "Não há evidência estatística de diferença significativa (p ≥ 0,05)."
+        )
 
     if tipo == "1-amostra":
+        mean = resultado.get("mean", None)
+        mu0 = resultado.get("mu0", None)
+        t_stat = resultado.get("t_stat", None)
+
+        diff = None
+        try:
+            if mean is not None and mu0 is not None:
+                diff = float(mean) - float(mu0)
+        except Exception:
+            diff = None
+
+        obs_note = ""
+        try:
+            if mean is not None and mu0 is not None and abs(float(mean) - float(mu0)) < 1e-9:
+                obs_note = (
+                    "\n\n> Observação: μ₀ está igual à média observada; "
+                    "por isso o teste tende a retornar **t ≈ 0** e **p ≈ 1**."
+                )
+        except Exception:
+            pass
+
         return f"""
 ### Teste t — 1 amostra
-Média observada: **{resultado.get('mean', float('nan')):.2f}**  
-Média hipotética: **{resultado.get('mu0', float('nan')):.2f}**  
-n = {resultado.get('n')}  
-t = {resultado.get('t_stat', float('nan')):.3f}  
-p-valor = **{p:.4f}**
+Média observada: **{_fmt_num_user(mean, 2)}**  
+Média hipotética (μ₀): **{_fmt_num_user(mu0, 2)}**  
+Diferença (observada − μ₀): **{_fmt_num_user(diff, 2)}**  
+n = {resultado.get("n")}  
+t = **{_fmt_num_user(t_stat, 3)}**  
+p-valor = **{p_txt}**
 
-**Conclusão:** {conclusao}
+**Conclusão:** {conclusao}{obs_note}
 """
 
     if tipo == "2-amostras":
+        mean1 = resultado.get("mean1", None)
+        mean2 = resultado.get("mean2", None)
+        n1 = resultado.get("n1", None)
+        n2 = resultado.get("n2", None)
+        t_stat = resultado.get("t_stat", None)
+
+        diff = None
+        try:
+            if mean1 is not None and mean2 is not None:
+                diff = float(mean1) - float(mean2)
+        except Exception:
+            diff = None
+
         return f"""
 ### Teste t — 2 amostras independentes
-Grupo 1 — média: **{resultado.get('mean1', float('nan')):.2f}** (n = {resultado.get('n1')})  
-Grupo 2 — média: **{resultado.get('mean2', float('nan')):.2f}** (n = {resultado.get('n2')})  
-t = {resultado.get('t_stat', float('nan')):.3f}  
-p-valor = **{p:.4f}**
+Grupo 1 — média: **{_fmt_num_user(mean1, 2)}** (n = {n1})  
+Grupo 2 — média: **{_fmt_num_user(mean2, 2)}** (n = {n2})  
+Diferença (G1 − G2): **{_fmt_num_user(diff, 2)}**  
+t = **{_fmt_num_user(t_stat, 3)}**  
+p-valor = **{p_txt}**
 
 **Conclusão:** {conclusao}
 """
 
     if tipo == "pareado":
+        t_stat = resultado.get("t_stat", None)
+        diff_mean = resultado.get("mean", None)
+
         return f"""
 ### Teste t — Pareado
-Diferença média (A − B): **{resultado.get('mean', float('nan')):.2f}**  
-n = {resultado.get('n')}  
-t = {resultado.get('t_stat', float('nan')):.3f}  
-p-valor = **{p:.4f}**
+Diferença média (A − B): **{_fmt_num_user(diff_mean, 2)}**  
+n = {resultado.get("n")}  
+t = **{_fmt_num_user(t_stat, 3)}**  
+p-valor = **{p_txt}**
 
 **Conclusão:** {conclusao}
 """
 
-    return """### Teste t\nResultado indisponível."""
+    return "### Teste t\nResultado indisponível."
+
 
 
 # ============================================================
@@ -376,6 +447,22 @@ def qqplot_figure(serie: pd.Series) -> go.Figure:
         template="plotly_white",
     )
     return fig
+
+def _fmt_p(p: float | None) -> str:
+    """Formatação amigável de p-valor (sem notação científica)."""
+    if p is None:
+        return "-"
+    try:
+        p = float(p)
+    except Exception:
+        return "-"
+    if np.isnan(p):
+        return "-"
+    # evita '0.0000' que confunde
+    if p < 0.0001:
+        return "< 0,0001"
+    # formata com 4 casas e vírgula pt-BR
+    return f"{p:.4f}".replace(".", ",")
 
 
 def narrativa_normalidade(resultado: dict) -> str:

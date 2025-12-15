@@ -89,20 +89,47 @@ def fase_analisar(df: pd.DataFrame) -> None:
                 st.warning("Não há colunas numéricas para este teste.")
             else:
                 col = st.selectbox("Variável numérica", num_cols)
-                media_hip = st.number_input(
-                    "Média hipotética",
-                    value=float(df[col].dropna().mean()) if not df[col].dropna().empty else 0.0,
-                )
-                res = teste_t_uma_amostra(df[col], media_hip)
-                st.markdown(narrativa_t(res, "1-amostra"))
+
+                s = df[col].dropna()
+                if s.empty:
+                    st.warning("A coluna selecionada não possui valores numéricos válidos.")
+                else:
+                    mean_obs = float(s.mean())
+
+                    st.caption(
+                        "Informe a média hipotética (μ₀) — normalmente uma meta, especificação ou baseline externo."
+                    )
+
+                    mu0 = st.number_input(
+                        "Média hipotética (μ₀)",
+                        value=round(mean_obs, 2),
+                        step=0.1,
+                        format="%.2f",
+                    )
+
+                    # Guardrail: evita teste trivial sem querer
+                    if abs(mu0 - mean_obs) < 1e-9:
+                        st.warning(
+                            "μ₀ está igual à média observada. Isso torna o teste trivial (t≈0, p≈1). "
+                            "Altere μ₀ para uma meta/especificação, ou confirme explicitamente se quiser esse cenário."
+                        )
+                        confirmar = st.checkbox(
+                            "Confirmo que quero testar com μ₀ igual à média observada",
+                            value=False,
+                        )
+                        if not confirmar:
+                            st.stop()
+
+                    res = teste_t_uma_amostra(df[col], mu0)
+                    st.markdown(narrativa_t(res, "1-amostra"))
 
         # ---------------------- TESTE t 2 AMOSTRAS ----------------------
         elif tipo == "Teste t — 2 amostras":
             if not num_cols or not cat_cols:
-                st.warning("É necessário ter ao menos uma numérica e uma categórica.")
+                st.warning("É necessário ter ao menos uma variável numérica e uma categórica.")
             else:
                 numcol = st.selectbox("Variável numérica", num_cols)
-                cat = st.selectbox("Variável categórica", cat_cols)
+                cat = st.selectbox("Variável categórica (grupos)", cat_cols)
 
                 grupos = df[cat].dropna().unique()
                 if len(grupos) < 2:
@@ -114,6 +141,7 @@ def fase_analisar(df: pd.DataFrame) -> None:
                         st.warning("Selecione uma variável com mais de 1 grupo distinto.")
                     else:
                         g2_label = st.selectbox("Grupo 2", g2_opcoes, index=0, key="t2_g2")
+
                         g1 = df[df[cat] == g1_label][numcol]
                         g2 = df[df[cat] == g2_label][numcol]
 
@@ -131,20 +159,20 @@ def fase_analisar(df: pd.DataFrame) -> None:
                     [c for c in num_cols if c != col1],
                     index=0,
                 )
+
                 res = teste_t_pareado(df[col1], df[col2])
                 st.markdown(narrativa_t(res, "pareado"))
 
         # ---------------------- ANOVA ----------------------
         elif tipo == "ANOVA One-Way":
             if not num_cols or not cat_cols:
-                st.warning("É necessário ter ao menos uma numérica e uma categórica.")
+                st.warning("É necessário ter ao menos uma variável numérica e uma categórica.")
             else:
                 numcol = st.selectbox("Variável numérica", num_cols)
                 cat = st.selectbox("Variável categórica (fatores)", cat_cols)
 
                 try:
                     res = anova_oneway(df, numcol, cat)
-                    # Mantém compatibilidade com o retorno atual:
                     if "anova" in res:
                         st.write(res["anova"])
                     elif "anova_table" in res:
@@ -159,12 +187,13 @@ def fase_analisar(df: pd.DataFrame) -> None:
                 st.warning("São necessárias pelo menos duas variáveis categóricas.")
             else:
                 c1 = st.selectbox("Variável categórica 1", cat_cols)
-                c2 = st.selectbox(
-                    "Variável categórica 2",
-                    [c for c in cat_cols if c != c1],
-                )
+                c2 = st.selectbox("Variável categórica 2", [c for c in cat_cols if c != c1])
+
                 res = teste_quiquadrado(df, c1, c2)
-                st.write(res["tabela"])
+                if "tabela" in res:
+                    st.write(res["tabela"])
+                elif "table" in res:
+                    st.write(res["table"])
                 st.markdown(narrativa_quiquadrado(res))
 
         # ---------------------- NORMALIDADE ----------------------

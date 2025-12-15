@@ -1,0 +1,63 @@
+{
+    "t_test_one_sample.csv": {
+        "mean": "PASS",
+        "std": "PASS",
+        "t_stat": "PASS",
+        "p_value": "PASS"
+    },
+    "t_test_two_samples.csv": {
+        "t_stat": "PASS",
+        "p_value": "PASS"
+    },
+    "t_test_paired.csv": {
+        "t_stat": "PASS",
+        "p_value": "PASS",
+        "diff_mean": "FAIL"
+    },
+    "anova_dataset.csv": {
+        "status": "ERROR",
+        "reason": "no data named 'Value' found",
+        "dataset": "anova_dataset.csv"
+    },
+    "chi_square_dataset.csv": {
+        "chi2": "PASS",
+        "p_value": "PASS",
+        "dof": "PASS"
+    },
+    "correlation_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: correlation_matrix"
+    },
+    "regression_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: regression_linear_simple"
+    },
+    "normality_dataset.csv": {
+        "w_stat": "PASS",
+        "p_value": "PASS"
+    },
+    "outliers_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: outliers"
+    },
+    "imr_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: imr_chart"
+    },
+    "xbar_r_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: xbar_r_chart"
+    },
+    "p_chart_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: p_chart"
+    },
+    "u_chart_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: u_chart"
+    },
+    "mixed_dataset.csv": {
+        "status": "SKIPPED",
+        "reason": "Tipo não implementado: mixed"
+    }
+}
