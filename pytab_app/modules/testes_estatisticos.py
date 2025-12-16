@@ -1,23 +1,3 @@
-"""
-pytab_app.modules.testes_estatisticos
-
-Contrato estatístico (base) para validação automática:
-
-    {
-      "teste": str,
-      "n": int,
-      "mean": float | None,
-      "std": float | None,
-      "t_stat": float | None,
-      "f_stat": float | None,
-      "p_value": float | None,
-    }
-
-Observação:
-- Funções podem retornar campos adicionais (ex.: mu0, n1, n2, mean1, mean2, dof, table),
-  mas DEVEM sempre incluir o contrato base acima para o validate_suite.
-"""
-
 from __future__ import annotations
 
 import numpy as np
@@ -32,10 +12,8 @@ from pytab.charts.theme import PRIMARY, SECONDARY
 
 
 # ============================================================
-# Helpers
+# Helpers (formatação para usuário final)
 # ============================================================
-
-import numpy as np  # se já existir, ignore
 
 def _fmt_num_user(x: float | None, nd: int = 2) -> str:
     if x is None:
@@ -48,8 +26,9 @@ def _fmt_num_user(x: float | None, nd: int = 2) -> str:
         return "-"
     return f"{x:.{nd}f}".replace(".", ",")
 
+
 def _fmt_p_user(p: float | None) -> str:
-    """Sem notação científica; evita '0.0000'."""
+    """Sem notação científica; evita '0.0000' e torna leitura imediata."""
     if p is None:
         return "-"
     try:
@@ -62,6 +41,10 @@ def _fmt_p_user(p: float | None) -> str:
         return "< 0,0001"
     return f"{p:.4f}".replace(".", ",")
 
+
+# ============================================================
+# Contrato estatístico base (para validação automática)
+# ============================================================
 
 def _base_contract(
     *,
@@ -132,9 +115,9 @@ def teste_t_duas_amostras(g1: pd.Series, g2: pd.Series) -> dict:
 
     t_stat, p_value = (np.nan, np.nan)
     if n1 >= 2 and n2 >= 2:
+        # Welch (mais robusto): equal_var=False
         t_stat, p_value = stats.ttest_ind(g1, g2, equal_var=False)
 
-    # Mantém contrato base + adiciona campos que a narrativa espera
     return _base_contract(
         teste="t_test_two_samples",
         n=n,
@@ -174,7 +157,7 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
     return _base_contract(
         teste="t_test_paired",
         n=n,
-        mean=mean_dif,     # diferença média (A − B)
+        mean=mean_dif,  # diferença média (A − B)
         std=std_dif,
         t_stat=None if np.isnan(t_stat) else float(t_stat),
         p_value=None if np.isnan(p_value) else float(p_value),
@@ -188,6 +171,7 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
 
 
 def narrativa_t(resultado: dict, tipo: str) -> str:
+    """Narrativas para Streamlit. Mostra sempre o que está sendo comparado."""
     p = resultado.get("p_value", None)
     p_txt = _fmt_p_user(p)
 
@@ -276,22 +260,46 @@ p-valor = **{p_txt}**
     return "### Teste t\nResultado indisponível."
 
 
-
 # ============================================================
 # 2) ANOVA One-Way
 # ============================================================
 
 def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
-    """ANOVA One-Way (statsmodels). Usa Q() para colunas com espaços/caracteres especiais."""
-    data = df[[numerica, categoria]].dropna()
+    """
+    ANOVA One-Way (statsmodels), robusta a:
+    - espaços/BOM/caracteres estranhos no nome de coluna
+    - nomes com espaço, hífen, etc.
+    - evita Patsy Q() e problemas de resolução de nomes
+    """
+    # 1) seleciona apenas as colunas necessárias
+    if numerica not in df.columns or categoria not in df.columns:
+        # fallback: tenta comparar via strip (caso clássico de "Value " vs "Value")
+        colmap = {c.strip(): c for c in df.columns}
+        if numerica in colmap:
+            numerica = colmap[numerica]
+        if categoria in colmap:
+            categoria = colmap[categoria]
+
+    data = df[[numerica, categoria]].copy()
+
+    # 2) limpeza mínima de headers (protege contra "Value ", BOM, \r)
+    data.columns = [str(c).strip().replace("\ufeff", "") for c in data.columns]
+    numerica_clean, categoria_clean = data.columns[0], data.columns[1]
+
+    # 3) dropna e rename temporário (contrato robusto para Patsy)
+    data = data.dropna()
     n = int(len(data))
 
-    mean = float(data[numerica].mean()) if n else None
-    std = float(data[numerica].std(ddof=1)) if n > 1 else None
+    mean = float(data[numerica_clean].mean()) if n else None
+    std = float(data[numerica_clean].std(ddof=1)) if n > 1 else None
 
-    formula = f'{Q(numerica)} ~ C({Q(categoria)})'
+    tmp = data.rename(columns={numerica_clean: "__y__", categoria_clean: "__g__"})
 
-    modelo = smf.ols(formula, data=data).fit()
+    # regra: precisa ter ao menos 2 grupos
+    if tmp["__g__"].nunique(dropna=True) < 2:
+        raise ValueError("ANOVA One-Way exige pelo menos 2 grupos na variável categórica.")
+
+    modelo = smf.ols("__y__ ~ C(__g__)", data=tmp).fit()
     tabela = sm.stats.anova_lm(modelo, typ=2)
 
     f_stat = float(tabela["F"].iloc[0])
@@ -305,26 +313,30 @@ def anova_oneway(df: pd.DataFrame, numerica: str, categoria: str) -> dict:
         t_stat=None,
         f_stat=f_stat,
         p_value=p_value,
-        value_column=str(numerica),
+        value_column=str(numerica),   # mantém o nome original selecionado
         group_column=str(categoria),
         anova_table=tabela,
     )
+
 
 
 def narrativa_anova(resultado: dict) -> str:
     p = resultado.get("p_value", None)
     f = resultado.get("f_stat", None)
 
+    if p is None or (isinstance(p, float) and np.isnan(p)):
+        return "### ANOVA One-Way\nResultado indisponível."
+
     conclusao = (
         "Há diferença significativa entre pelo menos dois grupos (p < 0,05)."
-        if (p is not None and p < 0.05)
+        if p < 0.05
         else "Não há evidência de diferença significativa entre os grupos (p ≥ 0,05)."
     )
 
     return f"""
 ### ANOVA One-Way
-F = **{f:.3f}**  
-p-valor = **{p:.4f}**
+F = **{_fmt_num_user(f, 3)}**  
+p-valor = **{_fmt_p_user(p)}**
 
 **Conclusão:** {conclusao}
 """
@@ -346,7 +358,7 @@ def teste_quiquadrado(df: pd.DataFrame, cat1: str, cat2: str) -> dict:
         mean=None,
         std=None,
         t_stat=None,
-        f_stat=float(chi2),  # usamos f_stat como "stat" geral (chi²) no contrato
+        f_stat=float(chi2),  # aqui usamos f_stat como "stat" geral (χ²)
         p_value=float(p),
         cat1=str(cat1),
         cat2=str(cat2),
@@ -361,16 +373,19 @@ def narrativa_quiquadrado(resultado: dict) -> str:
     chi2 = resultado.get("f_stat", None)
     dof = resultado.get("dof", None)
 
+    if p is None or (isinstance(p, float) and np.isnan(p)):
+        return "### Teste Qui-Quadrado\nResultado indisponível."
+
     conclusao = (
         "Há associação estatística entre as variáveis (p < 0,05)."
-        if (p is not None and p < 0.05)
+        if p < 0.05
         else "Não há evidência de associação estatística (p ≥ 0,05)."
     )
 
     return f"""
 ### Teste Qui-Quadrado
-χ² = **{chi2:.3f}** (gl = {dof})  
-p-valor = **{p:.4f}**
+χ² = **{_fmt_num_user(chi2, 3)}** (gl = {dof})  
+p-valor = **{_fmt_p_user(p)}**
 
 **Conclusão:** {conclusao}
 """
@@ -402,13 +417,12 @@ def teste_normalidade(serie: pd.Series, metodo: str = "shapiro") -> dict:
 
     stat, p = stats.shapiro(serie)
 
-    # mantém compat com JSON (w_stat)
     return _base_contract(
         teste=f"normality_{metodo}",
         n=n,
         mean=mean,
         std=std,
-        t_stat=float(stat),   # stat geral
+        t_stat=float(stat),
         f_stat=None,
         p_value=float(p),
         metodo=str(metodo),
@@ -448,36 +462,23 @@ def qqplot_figure(serie: pd.Series) -> go.Figure:
     )
     return fig
 
-def _fmt_p(p: float | None) -> str:
-    """Formatação amigável de p-valor (sem notação científica)."""
-    if p is None:
-        return "-"
-    try:
-        p = float(p)
-    except Exception:
-        return "-"
-    if np.isnan(p):
-        return "-"
-    # evita '0.0000' que confunde
-    if p < 0.0001:
-        return "< 0,0001"
-    # formata com 4 casas e vírgula pt-BR
-    return f"{p:.4f}".replace(".", ",")
-
 
 def narrativa_normalidade(resultado: dict) -> str:
     p = resultado.get("p_value", None)
     metodo = resultado.get("metodo", resultado.get("teste", "shapiro"))
 
+    if p is None or (isinstance(p, float) and np.isnan(p)):
+        return f"O teste de normalidade ({metodo}) não pôde ser calculado por falta de dados."
+
     conclusao = (
         "Os dados **não seguem** distribuição normal (p < 0,05)."
-        if (p is not None and p < 0.05)
+        if p < 0.05
         else "Os dados **seguem** distribuição aproximadamente normal (p ≥ 0,05)."
     )
 
     return f"""
 ### Teste de Normalidade — {metodo}
-p-valor = **{p:.4f}**
+p-valor = **{_fmt_p_user(p)}**
 
 **Conclusão:** {conclusao}
 """
