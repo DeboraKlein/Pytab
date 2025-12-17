@@ -102,15 +102,17 @@ def fase_controlar(df: pd.DataFrame) -> None:
     # P-CHART
     # ------------------------------------------------------------------
     if tipo_carta == "P-Chart (Proporção defeituosos)":
-        if not num_cols:
-            st.warning("Não há colunas numéricas suficientes para carta P.")
+        if len(num_cols) < 2:
+            st.warning("São necessárias pelo menos 2 colunas numéricas (defeituosos e inspecionados).")
             return
 
-        col_def = st.selectbox("Número de defeituosos", num_cols)
-        col_tot = st.selectbox(
-            "Total inspecionado",
-            [c for c in num_cols if c != col_def],
-        )
+        col_def = st.selectbox("Número de defeituosos", num_cols, key="p_def")
+        tot_opcoes = [c for c in num_cols if c != col_def]
+        if not tot_opcoes:
+            st.warning("Selecione um arquivo com pelo menos duas colunas numéricas distintas.")
+            return
+
+        col_tot = st.selectbox("Total inspecionado", tot_opcoes, key="p_tot")
 
         try:
             fig, resumo = carta_p(df[col_def], df[col_tot])
@@ -118,7 +120,7 @@ def fase_controlar(df: pd.DataFrame) -> None:
             plt.close(fig)
             st.markdown(narrativa_p(col_def, col_tot, resumo))
         except Exception as e:
-            st.error(f"Erro ao gerar carta P: {e}")
+            st.error(f"Erro ao gerar carta P: {repr(e)}")
 
         return
 
@@ -126,15 +128,17 @@ def fase_controlar(df: pd.DataFrame) -> None:
     # U-CHART
     # ------------------------------------------------------------------
     if tipo_carta == "U-Chart (Defeitos por unidade)":
-        if not num_cols:
-            st.warning("Não há colunas numéricas suficientes para carta U.")
+        if len(num_cols) < 2:
+            st.warning("São necessárias pelo menos 2 colunas numéricas (defeitos e oportunidades).")
             return
 
-        col_def = st.selectbox("Número de defeitos", num_cols)
-        col_opp = st.selectbox(
-            "Unidades de oportunidade",
-            [c for c in num_cols if c != col_def],
-        )
+        col_def = st.selectbox("Número de defeitos", num_cols, key="u_def")
+        opp_opcoes = [c for c in num_cols if c != col_def]
+        if not opp_opcoes:
+            st.warning("Selecione um arquivo com pelo menos duas colunas numéricas distintas.")
+            return
+
+        col_opp = st.selectbox("Unidades de oportunidade", opp_opcoes, key="u_opp")
 
         try:
             fig, resumo = carta_u(df[col_def], df[col_opp])
@@ -142,6 +146,7 @@ def fase_controlar(df: pd.DataFrame) -> None:
             plt.close(fig)
             st.markdown(narrativa_u(col_def, col_opp, resumo))
         except Exception as e:
-            st.error(f"Erro ao gerar carta U: {e}")
+            st.error(f"Erro ao gerar carta U: {repr(e)}")
 
         return
+

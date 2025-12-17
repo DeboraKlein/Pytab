@@ -1,63 +1,859 @@
 {
+  "summary": {
+    "PASS": 12,
+    "FAIL": 1,
+    "ERROR": 1,
+    "SKIPPED": 0
+  },
+  "results": {
     "t_test_one_sample.csv": {
-        "mean": "PASS",
-        "std": "PASS",
-        "t_stat": "PASS",
-        "p_value": "PASS"
+      "type": "t_test_one_sample",
+      "status": "PASS",
+      "checks": {
+        "n": {
+          "expected": 120,
+          "got": 120,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "mean": {
+          "expected": 48.95885488070122,
+          "got": 48.95885488070122,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "std": {
+          "expected": 10.628183694882019,
+          "got": 10.628183694882019,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "t_stat": {
+          "expected": -1.073106532306094,
+          "got": -1.073106532306094,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 0.2853946119088915,
+          "got": 0.2853946119088914,
+          "abs_error": 5.551115123125783e-17,
+          "rel_error": 1.9450665469808885e-16,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "n": 120,
+        "mean": 48.95885488070122,
+        "std": 10.628183694882019,
+        "t_stat": -1.073106532306094,
+        "p_value": 0.2853946119088914
+      }
     },
     "t_test_two_samples.csv": {
-        "t_stat": "PASS",
-        "p_value": "PASS"
+      "type": "t_test_two_samples",
+      "status": "PASS",
+      "checks": {
+        "t_stat": {
+          "expected": -4.188310197999909,
+          "got": -4.188310197999909,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 4.734127690269643e-05,
+          "got": 4.734127690269643e-05,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        },
+        "group_A_n": {
+          "expected": 80,
+          "got": 80,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "group_A_mean": {
+          "expected": 59.40721313740836,
+          "got": 59.40721313740836,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "group_A_std": {
+          "expected": 7.931537066867746,
+          "got": 7.931537066867746,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "group_B_n": {
+          "expected": 75,
+          "got": 75,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "group_B_mean": {
+          "expected": 64.68793169930713,
+          "got": 64.68793169930713,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "group_B_std": {
+          "expected": 7.761970154292536,
+          "got": 7.761970154292536,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "group_stats": {
+          "A": {
+            "n": 80,
+            "mean": 59.40721313740836,
+            "std": 7.931537066867746
+          },
+          "B": {
+            "n": 75,
+            "mean": 64.68793169930713,
+            "std": 7.761970154292536
+          }
+        },
+        "t_stat": -4.188310197999909,
+        "p_value": 4.734127690269643e-05
+      }
     },
     "t_test_paired.csv": {
-        "t_stat": "PASS",
-        "p_value": "PASS",
-        "diff_mean": "FAIL"
+      "type": "t_test_paired",
+      "status": "PASS",
+      "checks": {
+        "n": {
+          "expected": 60,
+          "got": 60,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "mean_before": {
+          "expected": 100.46477504132476,
+          "got": 100.46477504132476,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "mean_after": {
+          "expected": 95.00660180043927,
+          "got": 95.00660180043927,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "diff_mean": {
+          "expected": -5.458173240885494,
+          "got": -5.458173240885494,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "t_stat": {
+          "expected": 14.016300337622843,
+          "got": 14.016300337622843,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 1.9672568041446347e-20,
+          "got": 1.9672568041446347e-20,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "n": 60,
+        "mean_before": 100.46477504132476,
+        "mean_after": 95.00660180043927,
+        "diff_mean": -5.458173240885494,
+        "t_stat": 14.016300337622843,
+        "p_value": 1.9672568041446347e-20
+      }
     },
     "anova_dataset.csv": {
-        "status": "ERROR",
-        "reason": "no data named 'Value' found",
-        "dataset": "anova_dataset.csv"
+      "type": "anova_oneway",
+      "status": "PASS",
+      "checks": {
+        "f_stat": {
+          "expected": 39.33243419044912,
+          "got": 39.33243419044899,
+          "abs_error": 1.2789769243681803e-13,
+          "rel_error": 3.2517105810825897e-15,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 8.61729357376662e-14,
+          "got": 8.617293573767285e-14,
+          "abs_error": 6.651675152823572e-27,
+          "rel_error": 6.6516751528235715e-15,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        },
+        "group_mean_G1": {
+          "expected": 49.598448031483215,
+          "got": 49.598448031483215,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "group_mean_G2": {
+          "expected": 55.997479391133766,
+          "got": 55.997479391133766,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "group_mean_G3": {
+          "expected": 59.31245343914105,
+          "got": 59.31245343914105,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "f_stat": 39.33243419044899,
+        "p_value": 8.617293573767285e-14,
+        "group_means": {
+          "G1": 49.598448031483215,
+          "G2": 55.997479391133766,
+          "G3": 59.31245343914105
+        }
+      }
     },
     "chi_square_dataset.csv": {
-        "chi2": "PASS",
-        "p_value": "PASS",
-        "dof": "PASS"
+      "type": "chi_square_independence",
+      "status": "PASS",
+      "checks": {
+        "chi2": {
+          "expected": 0.0,
+          "got": 0.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        },
+        "dof": {
+          "expected": 2,
+          "got": 2,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "table": {
+          "expected": {
+            "No": {
+              "M1": 23,
+              "M2": 23,
+              "M3": 23
+            },
+            "Yes": {
+              "M1": 17,
+              "M2": 17,
+              "M3": 17
+            }
+          },
+          "got": {
+            "No": {
+              "M1": 23,
+              "M2": 23,
+              "M3": 23
+            },
+            "Yes": {
+              "M1": 17,
+              "M2": 17,
+              "M3": 17
+            }
+          },
+          "abs_error": null,
+          "rel_error": null,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "chi2": 0.0,
+        "p_value": 1.0,
+        "dof": 2,
+        "table": {
+          "No": {
+            "M1": 23,
+            "M2": 23,
+            "M3": 23
+          },
+          "Yes": {
+            "M1": 17,
+            "M2": 17,
+            "M3": 17
+          }
+        }
+      }
     },
     "correlation_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: correlation_matrix"
+      "type": "correlation_matrix",
+      "status": "PASS",
+      "checks": {
+        "X__X": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "X__Y": {
+          "expected": 0.9279540397049051,
+          "got": 0.9279540397049051,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "X__Z": {
+          "expected": -0.05342805974093002,
+          "got": -0.05342805974093002,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Y__X": {
+          "expected": 0.9279540397049051,
+          "got": 0.9279540397049051,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Y__Y": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Y__Z": {
+          "expected": -0.08269685796335619,
+          "got": -0.08269685796335619,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Z__X": {
+          "expected": -0.05342805974093002,
+          "got": -0.05342805974093002,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Z__Y": {
+          "expected": -0.08269685796335619,
+          "got": -0.08269685796335619,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "Z__Z": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "corr_matrix": {
+          "X": {
+            "X": 1.0,
+            "Y": 0.9279540397049051,
+            "Z": -0.05342805974093002
+          },
+          "Y": {
+            "X": 0.9279540397049051,
+            "Y": 1.0,
+            "Z": -0.08269685796335619
+          },
+          "Z": {
+            "X": -0.05342805974093002,
+            "Y": -0.08269685796335619,
+            "Z": 1.0
+          }
+        }
+      }
     },
     "regression_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: regression_linear_simple"
+      "type": "regression_linear_simple",
+      "status": "PASS",
+      "checks": {
+        "slope": {
+          "expected": 3.024852948852316,
+          "got": 3.0248529488523173,
+          "abs_error": 1.3322676295501878e-15,
+          "rel_error": 4.404404617605211e-16,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "intercept": {
+          "expected": 38.461610053290954,
+          "got": 38.46161005329094,
+          "abs_error": 1.4210854715202004e-14,
+          "rel_error": 3.6948153484765667e-16,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "r2": {
+          "expected": 0.9860641355606787,
+          "got": 0.9860641355606793,
+          "abs_error": 5.551115123125783e-16,
+          "rel_error": 5.62956801990309e-16,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "slope": 3.0248529488523173,
+        "intercept": 38.46161005329094,
+        "r2": 0.9860641355606793
+      }
     },
     "normality_dataset.csv": {
-        "w_stat": "PASS",
-        "p_value": "PASS"
+      "type": "normality_shapiro",
+      "status": "PASS",
+      "checks": {
+        "w_stat": {
+          "expected": 0.9971717915091215,
+          "got": 0.9971717915091215,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "p_value": {
+          "expected": 0.8828095592153917,
+          "got": 0.8828095592153918,
+          "abs_error": 1.1102230246251565e-16,
+          "rel_error": 1.2576019516733388e-16,
+          "abs_tol": 1e-06,
+          "rel_tol": 0.001,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "w_stat": 0.9971717915091215,
+        "p_value": 0.8828095592153918
+      }
     },
     "outliers_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: outliers"
+      "type": "outliers",
+      "status": "FAIL",
+      "checks": {
+        "mean": {
+          "expected": 102.19425714392698,
+          "got": 102.19425714392698,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "std": {
+          "expected": 12.546734779573288,
+          "got": 12.512778736853223,
+          "abs_error": 0.03395604272006558,
+          "rel_error": 0.0027063649082108374,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "FAIL"
+        },
+        "q1": {
+          "expected": 96.75304153128128,
+          "got": 96.75304153128128,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "q3": {
+          "expected": 104.15354925248045,
+          "got": 104.15354925248045,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "iqr": {
+          "expected": 7.400507721199162,
+          "got": 7.400507721199162,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "lower_iqr_bound": {
+          "expected": 85.65227994948253,
+          "got": 85.65227994948253,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "upper_iqr_bound": {
+          "expected": 115.25431083427918,
+          "got": 115.25431083427918,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "mad": {
+          "expected": 3.713705147216288,
+          "got": 3.713705147216288,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "zscore_outlier_indices": {
+          "expected": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "got": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "abs_error": null,
+          "rel_error": null,
+          "status": "PASS"
+        },
+        "iqr_outlier_indices": {
+          "expected": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "got": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "abs_error": null,
+          "rel_error": null,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "mean": 102.19425714392698,
+        "std": 12.512778736853223,
+        "q1": 96.75304153128128,
+        "q3": 104.15354925248045,
+        "iqr": 7.400507721199162,
+        "lower_iqr_bound": 85.65227994948253,
+        "upper_iqr_bound": 115.25431083427918,
+        "mad": 3.713705147216288,
+        "zscore_threshold": 3.0,
+        "zscore_outlier_indices": [
+          180,
+          181,
+          182,
+          183,
+          184
+        ],
+        "iqr_outlier_indices": [
+          180,
+          181,
+          182,
+          183,
+          184
+        ]
+      }
     },
     "imr_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: imr_chart"
+      "type": "imr_chart",
+      "status": "PASS",
+      "checks": {
+        "n": {
+          "expected": 200,
+          "got": 200,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "mean": {
+          "expected": 99.79614517413957,
+          "got": 99.79614517413957,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "mr_bar": {
+          "expected": 5.492954475766882,
+          "got": 5.492954475766882,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "sigma_est": {
+          "expected": 4.869640492701137,
+          "got": 4.869640492701137,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "ucl_x": {
+          "expected": 114.40506665224298,
+          "got": 114.40506665224298,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "lcl_x": {
+          "expected": 85.18722369603616,
+          "got": 85.18722369603616,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "n": 200,
+        "mean": 99.79614517413957,
+        "mr_bar": 5.492954475766882,
+        "sigma_est": 4.869640492701137,
+        "ucl_x": 114.40506665224298,
+        "lcl_x": 85.18722369603616
+      }
     },
     "xbar_r_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: xbar_r_chart"
+      "type": "xbar_r_chart",
+      "status": "PASS",
+      "checks": {
+        "xbar_bar": {
+          "expected": 10.171736373797753,
+          "got": 10.171736373797753,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "r_bar": {
+          "expected": 4.492369955508704,
+          "got": 4.492369955508704,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "ucl_xbar": {
+          "expected": 12.763833838126274,
+          "got": 12.763833838126274,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "lcl_xbar": {
+          "expected": 7.579638909469231,
+          "got": 7.579638909469231,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "ucl_r": {
+          "expected": 9.4968700859454,
+          "got": 9.4968700859454,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "lcl_r": {
+          "expected": 0.0,
+          "got": 0.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "xbar_bar": 10.171736373797753,
+        "r_bar": 4.492369955508704,
+        "ucl_xbar": 12.763833838126274,
+        "lcl_xbar": 7.579638909469231,
+        "ucl_r": 9.4968700859454,
+        "lcl_r": 0.0
+      }
     },
     "p_chart_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: p_chart"
+      "type": "p_chart",
+      "status": "PASS",
+      "checks": {
+        "p_bar": {
+          "expected": 0.04413794353989817,
+          "got": 0.044053630506703814,
+          "abs_error": 8.431303319435257e-05,
+          "rel_error": 0.0019102166170958652,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "p_bar": 0.044053630506703814
+      }
     },
     "u_chart_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: u_chart"
+      "type": "u_chart",
+      "status": "PASS",
+      "checks": {
+        "u_bar": {
+          "expected": 2.683333333333333,
+          "got": 2.683333333333333,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "u_bar": 2.683333333333333
+      }
     },
     "mixed_dataset.csv": {
-        "status": "SKIPPED",
-        "reason": "Tipo não implementado: mixed"
+      "type": "mixed",
+      "status": "ERROR",
+      "error": "KeyError('corr_matrix')"
     }
+  }
 }
