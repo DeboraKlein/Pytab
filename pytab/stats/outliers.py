@@ -12,7 +12,7 @@ import pandas as pd
 
 def zscore_series(
     s: pd.Series,
-    ddof: int = 0
+    ddof: int = 1
 ) -> pd.Series:
     """
     Calcula o z-score de uma série numérica.
@@ -40,7 +40,7 @@ def zscore_series(
 def detect_outliers_zscore(
     s: pd.Series,
     threshold: float = 3.0,
-    ddof: int = 0
+    ddof: int = 1
 ) -> Dict[str, Any]:
     """
     Detecta outliers em uma série numérica usando z-score.
@@ -165,7 +165,7 @@ def detect_outliers(
     method: Literal["zscore", "iqr"] = "zscore",
     threshold: float = 3.0,
     factor: float = 1.5,
-    ddof: int = 0,
+    ddof: int = 1,
 ) -> Dict[str, Any]:
     """
     Função de alto nível para detecção de outliers em uma série.
