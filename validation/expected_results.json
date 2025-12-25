@@ -13,7 +13,7 @@
         "type": "t_test_two_samples",
         "value_column": "Value",
         "group_column": "Group",
-        "groups": [
+        "groups": [     
             "A",
             "B"
         ],

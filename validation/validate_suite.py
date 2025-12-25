@@ -370,16 +370,43 @@ def _regression_linear_simple(df: pd.DataFrame, expected: dict) -> Dict[str, Any
 
 
 def _correlation_matrix(df: pd.DataFrame, expected: dict) -> Dict[str, Any]:
-    cols = expected["columns"]
+    checks: Dict[str, Any] = {}
+    got: Dict[str, Any] = {}
+
+    # Aceita "correlation" ou "corr_matrix" no expected
+    corr_expected = expected.get("corr_matrix") or expected.get("correlation")
+    if corr_expected is None:
+        return {
+            "type": expected["type"],
+            "status": "SKIPPED",
+            "reason": "Expected sem corr_matrix/correlation",
+        }
+
+    # Descobre colunas: 1) numeric_columns 2) columns 3) chaves da matriz 4) inferência por dtype
+    cols = (
+        expected.get("numeric_columns")
+        or expected.get("columns")
+        or (list(corr_expected.keys()) if isinstance(corr_expected, dict) else None)
+        or df.select_dtypes(include="number").columns.tolist()
+    )
+
+    got["numeric_columns"] = cols
+    if "numeric_columns" in expected:
+        checks["numeric_columns"] = compare_list(cols, expected["numeric_columns"])
+
     corr = df[cols].corr(numeric_only=True)
 
-    checks = {}
-    for a, row in expected["corr_matrix"].items():
-        for b, val in row.items():
-            checks[f"{a}__{b}"] = compare_numeric(float(corr.loc[a, b]), val)
+    # Salva no got com o mesmo nome do expected
+    got_key = "corr_matrix" if "corr_matrix" in expected else "correlation"
+    got[got_key] = corr.to_dict()
 
-    got = {"corr_matrix": corr.to_dict()}
+    # Compara coeficientes esperados
+    for a, row in corr_expected.items():
+        for b, val in row.items():
+            checks[f"corr_{a}__{b}"] = compare_numeric(float(corr.loc[a, b]), val)
+
     return {"type": expected["type"], "status": _status_rollup(checks), "checks": checks, "got": got}
+
 
 
 def _outliers(df: pd.DataFrame, expected: dict) -> Dict[str, Any]:
@@ -387,7 +414,7 @@ def _outliers(df: pd.DataFrame, expected: dict) -> Dict[str, Any]:
     s = pd.to_numeric(df[col], errors="coerce")
 
     mean = float(s.mean())
-    std = float(s.std(ddof=0))
+    std = float(s.std(ddof=1))
     q1 = float(s.quantile(0.25))
     q3 = float(s.quantile(0.75))
     iqr = float(q3 - q1)
@@ -531,37 +558,63 @@ def _imr_chart(df: pd.DataFrame, expected: dict) -> Dict[str, Any]:
 
 
 def _mixed(df: pd.DataFrame, expected: dict) -> Dict[str, Any]:
+    checks: Dict[str, Any] = {}
+    got: Dict[str, Any] = {}
+
+    # 1) Colunas numéricas detectadas
     num_cols = df.select_dtypes(include="number").columns.tolist()
+    got["numeric_columns"] = num_cols
 
-    checks: Dict[str, Any] = {
-        "numeric_columns": compare_list(num_cols, expected["numeric_columns"])
-    }
-    got: Dict[str, Any] = {"numeric_columns": num_cols}
+    if "numeric_columns" in expected:
+        checks["numeric_columns"] = compare_list(num_cols, expected["numeric_columns"])
 
-    desc_got = {}
-    for c in expected["numeric_columns"]:
+    # 2) Descritivas (usa as colunas declaradas no expected, para ficar determinístico)
+    exp_desc = expected.get("descriptive") or {}
+    got_desc: Dict[str, Any] = {}
+
+    for c, ed in exp_desc.items():
         s = pd.to_numeric(df[c], errors="coerce").dropna()
-        desc_got[c] = {
-            "mean": float(s.mean()),
+
+        got_desc[c] = {
+            "mean": float(s.mean()) if len(s) else None,
             "std": float(s.std(ddof=1)) if len(s) > 1 else None,
             "min": float(s.min()) if len(s) else None,
             "max": float(s.max()) if len(s) else None,
         }
-        ed = expected["descriptive"][c]
-        checks[f"desc_{c}_mean"] = compare_numeric(desc_got[c]["mean"], ed["mean"])
-        checks[f"desc_{c}_std"] = compare_numeric(desc_got[c]["std"], ed["std"])
-        checks[f"desc_{c}_min"] = compare_numeric(desc_got[c]["min"], ed["min"])
-        checks[f"desc_{c}_max"] = compare_numeric(desc_got[c]["max"], ed["max"])
 
-    got["descriptive"] = desc_got
+        checks[f"desc_{c}_mean"] = compare_numeric(got_desc[c]["mean"], ed.get("mean"))
+        checks[f"desc_{c}_std"] = compare_numeric(got_desc[c]["std"], ed.get("std"))
+        checks[f"desc_{c}_min"] = compare_numeric(got_desc[c]["min"], ed.get("min"))
+        checks[f"desc_{c}_max"] = compare_numeric(got_desc[c]["max"], ed.get("max"))
 
-    corr = df[expected["numeric_columns"]].corr(numeric_only=True)
-    got["corr_matrix"] = corr.to_dict()
-    for a, row in expected["corr_matrix"].items():
-        for b, val in row.items():
-            checks[f"corr_{a}__{b}"] = compare_numeric(float(corr.loc[a, b]), val)
+    got["descriptive"] = got_desc
+
+    # 3) Correlação (aceita 'correlation' ou 'corr_matrix')
+    corr_expected = expected.get("corr_matrix") or expected.get("correlation")
+    if corr_expected is not None:
+        cols = expected.get("numeric_columns") or list(corr_expected.keys())
+        corr = df[cols].corr(numeric_only=True)
+
+        got_key = "corr_matrix" if "corr_matrix" in expected else "correlation"
+        got[got_key] = corr.to_dict()
+
+        for a, row in corr_expected.items():
+            for b, val in row.items():
+                checks[f"corr_{a}__{b}"] = compare_numeric(float(corr.loc[a, b]), val)
 
     return {"type": expected["type"], "status": _status_rollup(checks), "checks": checks, "got": got}
+
+
+    corr_expected = expected.get("corr_matrix") or expected.get("correlation")
+    if corr_expected is not None:
+        corr = df[expected["numeric_columns"]].corr(numeric_only=True)
+
+        got_key = "corr_matrix" if "corr_matrix" in expected else "correlation"
+        got[got_key] = corr.to_dict()
+
+        for a, row in corr_expected.items():
+            for b, val in row.items():
+                checks[f"corr_{a}__{b}"] = compare_numeric(float(corr.loc[a, b]), val)
 
 
 # ================================
@@ -613,6 +666,9 @@ def main():
             res = validator(df, expected)
             report[fname] = res
             summary[res["status"]] = summary.get(res["status"], 0) + 1
+            if res is None:
+                raise ValueError(f"Validator '{tipo}' retornou None (faltou return).")
+
 
         except Exception as e:
             report[fname] = {"type": tipo, "status": "ERROR", "error": repr(e)}

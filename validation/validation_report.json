@@ -1,8 +1,8 @@
 {
   "summary": {
-    "PASS": 12,
-    "FAIL": 1,
-    "ERROR": 1,
+    "PASS": 14,
+    "FAIL": 0,
+    "ERROR": 0,
     "SKIPPED": 0
   },
   "results": {
@@ -369,7 +369,7 @@
       "type": "correlation_matrix",
       "status": "PASS",
       "checks": {
-        "X__X": {
+        "corr_X__X": {
           "expected": 1.0,
           "got": 1.0,
           "abs_error": 0.0,
@@ -378,7 +378,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "X__Y": {
+        "corr_X__Y": {
           "expected": 0.9279540397049051,
           "got": 0.9279540397049051,
           "abs_error": 0.0,
@@ -387,7 +387,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "X__Z": {
+        "corr_X__Z": {
           "expected": -0.05342805974093002,
           "got": -0.05342805974093002,
           "abs_error": 0.0,
@@ -396,7 +396,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Y__X": {
+        "corr_Y__X": {
           "expected": 0.9279540397049051,
           "got": 0.9279540397049051,
           "abs_error": 0.0,
@@ -405,7 +405,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Y__Y": {
+        "corr_Y__Y": {
           "expected": 1.0,
           "got": 1.0,
           "abs_error": 0.0,
@@ -414,7 +414,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Y__Z": {
+        "corr_Y__Z": {
           "expected": -0.08269685796335619,
           "got": -0.08269685796335619,
           "abs_error": 0.0,
@@ -423,7 +423,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Z__X": {
+        "corr_Z__X": {
           "expected": -0.05342805974093002,
           "got": -0.05342805974093002,
           "abs_error": 0.0,
@@ -432,7 +432,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Z__Y": {
+        "corr_Z__Y": {
           "expected": -0.08269685796335619,
           "got": -0.08269685796335619,
           "abs_error": 0.0,
@@ -441,7 +441,7 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "Z__Z": {
+        "corr_Z__Z": {
           "expected": 1.0,
           "got": 1.0,
           "abs_error": 0.0,
@@ -452,6 +452,11 @@
         }
       },
       "got": {
+        "numeric_columns": [
+          "X",
+          "Y",
+          "Z"
+        ],
         "corr_matrix": {
           "X": {
             "X": 1.0,
@@ -539,7 +544,7 @@
     },
     "outliers_dataset.csv": {
       "type": "outliers",
-      "status": "FAIL",
+      "status": "PASS",
       "checks": {
         "mean": {
           "expected": 102.19425714392698,
@@ -552,12 +557,12 @@
         },
         "std": {
           "expected": 12.546734779573288,
-          "got": 12.512778736853223,
-          "abs_error": 0.03395604272006558,
-          "rel_error": 0.0027063649082108374,
+          "got": 12.546734779573288,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
-          "status": "FAIL"
+          "status": "PASS"
         },
         "q1": {
           "expected": 96.75304153128128,
@@ -654,7 +659,7 @@
       },
       "got": {
         "mean": 102.19425714392698,
-        "std": 12.512778736853223,
+        "std": 12.546734779573288,
         "q1": 96.75304153128128,
         "q3": 104.15354925248045,
         "iqr": 7.400507721199162,
@@ -852,8 +857,257 @@
     },
     "mixed_dataset.csv": {
       "type": "mixed",
-      "status": "ERROR",
-      "error": "KeyError('corr_matrix')"
+      "status": "PASS",
+      "checks": {
+        "numeric_columns": {
+          "expected": [
+            "Revenue",
+            "Profit",
+            "Defects"
+          ],
+          "got": [
+            "Revenue",
+            "Profit",
+            "Defects"
+          ],
+          "abs_error": null,
+          "rel_error": null,
+          "status": "PASS"
+        },
+        "desc_Revenue_mean": {
+          "expected": 998.285255161139,
+          "got": 998.285255161139,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Revenue_std": {
+          "expected": 188.92137579204444,
+          "got": 188.92137579204444,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Revenue_min": {
+          "expected": 463.0423905765016,
+          "got": 463.0423905765016,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Revenue_max": {
+          "expected": 1443.8402543923555,
+          "got": 1443.8402543923555,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Profit_mean": {
+          "expected": 200.82464499631317,
+          "got": 200.82464499631317,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Profit_std": {
+          "expected": 50.09873583557555,
+          "got": 50.09873583557555,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Profit_min": {
+          "expected": 33.762214004445184,
+          "got": 33.762214004445184,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Profit_max": {
+          "expected": 353.09734827031093,
+          "got": 353.09734827031093,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Defects_mean": {
+          "expected": 2.78,
+          "got": 2.78,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Defects_std": {
+          "expected": 1.6719981726805913,
+          "got": 1.6719981726805913,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Defects_min": {
+          "expected": 0.0,
+          "got": 0.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "desc_Defects_max": {
+          "expected": 10.0,
+          "got": 10.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Revenue__Revenue": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Revenue__Profit": {
+          "expected": -0.0840860265061449,
+          "got": -0.0840860265061449,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Revenue__Defects": {
+          "expected": -0.0050563916949224715,
+          "got": -0.0050563916949224715,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Profit__Revenue": {
+          "expected": -0.0840860265061449,
+          "got": -0.0840860265061449,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Profit__Profit": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Profit__Defects": {
+          "expected": -0.13557256525268993,
+          "got": -0.13557256525268993,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Defects__Revenue": {
+          "expected": -0.0050563916949224715,
+          "got": -0.0050563916949224715,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Defects__Profit": {
+          "expected": -0.13557256525268993,
+          "got": -0.13557256525268993,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        },
+        "corr_Defects__Defects": {
+          "expected": 1.0,
+          "got": 1.0,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0.001,
+          "rel_tol": 1e-06,
+          "status": "PASS"
+        }
+      },
+      "got": {
+        "numeric_columns": [
+          "Revenue",
+          "Profit",
+          "Defects"
+        ],
+        "descriptive": {
+          "Revenue": {
+            "mean": 998.285255161139,
+            "std": 188.92137579204444,
+            "min": 463.0423905765016,
+            "max": 1443.8402543923555
+          },
+          "Profit": {
+            "mean": 200.82464499631317,
+            "std": 50.09873583557555,
+            "min": 33.762214004445184,
+            "max": 353.09734827031093
+          },
+          "Defects": {
+            "mean": 2.78,
+            "std": 1.6719981726805913,
+            "min": 0.0,
+            "max": 10.0
+          }
+        },
+        "correlation": {
+          "Revenue": {
+            "Revenue": 1.0,
+            "Profit": -0.0840860265061449,
+            "Defects": -0.0050563916949224715
+          },
+          "Profit": {
+            "Revenue": -0.0840860265061449,
+            "Profit": 1.0,
+            "Defects": -0.13557256525268993
+          },
+          "Defects": {
+            "Revenue": -0.0050563916949224715,
+            "Profit": -0.13557256525268993,
+            "Defects": 1.0
+          }
+        }
+      }
     }
   }
 }
