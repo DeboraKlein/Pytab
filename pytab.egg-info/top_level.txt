@@ -1,5 +1,0 @@
-docs
-pytab
-pytab_app
-temp_upload
-tests

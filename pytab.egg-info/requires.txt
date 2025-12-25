@@ -1,5 +1,0 @@
-pandas
-numpy
-reportlab
-streamlit
-matplotlib
