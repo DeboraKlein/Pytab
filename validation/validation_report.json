@@ -1,9 +1,9 @@
 {
   "summary": {
-    "PASS": 14,
+    "PASS": 26,
     "FAIL": 0,
     "ERROR": 0,
-    "SKIPPED": 0
+    "SKIPPED": 2
   },
   "results": {
     "t_test_one_sample.csv": {
@@ -50,7 +50,7 @@
           "expected": 0.2853946119088915,
           "got": 0.2853946119088914,
           "abs_error": 5.551115123125783e-17,
-          "rel_error": 1.9450665469808885e-16,
+          "rel_error": 1.9450665469740732e-16,
           "abs_tol": 1e-06,
           "rel_tol": 0.001,
           "status": "PASS"
@@ -61,7 +61,8 @@
         "mean": 48.95885488070122,
         "std": 10.628183694882019,
         "t_stat": -1.073106532306094,
-        "p_value": 0.2853946119088914
+        "p_value": 0.2853946119088914,
+        "mu0": 50.0
       }
     },
     "t_test_two_samples.csv": {
@@ -155,7 +156,10 @@
           }
         },
         "t_stat": -4.188310197999909,
-        "p_value": 4.734127690269643e-05
+        "p_value": 4.734127690269643e-05,
+        "n": 155,
+        "mean": 61.962399538327126,
+        "std": 8.260238090399586
       }
     },
     "t_test_paired.csv": {
@@ -223,7 +227,8 @@
         "mean_after": 95.00660180043927,
         "diff_mean": -5.458173240885494,
         "t_stat": 14.016300337622843,
-        "p_value": 1.9672568041446347e-20
+        "p_value": 1.9672568041446347e-20,
+        "pytab_diff_mean_raw": -5.458173240885494
       }
     },
     "anova_dataset.csv": {
@@ -234,7 +239,7 @@
           "expected": 39.33243419044912,
           "got": 39.33243419044899,
           "abs_error": 1.2789769243681803e-13,
-          "rel_error": 3.2517105810825897e-15,
+          "rel_error": 3.251710581082507e-15,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
@@ -243,7 +248,7 @@
           "expected": 8.61729357376662e-14,
           "got": 8.617293573767285e-14,
           "abs_error": 6.651675152823572e-27,
-          "rel_error": 6.6516751528235715e-15,
+          "rel_error": 6.1239558950215755e-15,
           "abs_tol": 1e-06,
           "rel_tol": 0.001,
           "status": "PASS"
@@ -279,6 +284,11 @@
       "got": {
         "f_stat": 39.33243419044899,
         "p_value": 8.617293573767285e-14,
+        "n": 120,
+        "mean": 54.96946028725268,
+        "std": 6.385309097576214,
+        "value_column": "Value",
+        "group_column": "Group",
         "group_means": {
           "G1": 49.598448031483215,
           "G2": 55.997479391133766,
@@ -482,36 +492,36 @@
       "checks": {
         "slope": {
           "expected": 3.024852948852316,
-          "got": 3.0248529488523173,
-          "abs_error": 1.3322676295501878e-15,
-          "rel_error": 4.404404617605211e-16,
+          "got": 3.024852948852316,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
         },
         "intercept": {
           "expected": 38.461610053290954,
-          "got": 38.46161005329094,
-          "abs_error": 1.4210854715202004e-14,
-          "rel_error": 3.6948153484765667e-16,
+          "got": 38.461610053290954,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
         },
         "r2": {
           "expected": 0.9860641355606787,
-          "got": 0.9860641355606793,
-          "abs_error": 5.551115123125783e-16,
-          "rel_error": 5.62956801990309e-16,
+          "got": 0.9860641355606787,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
         }
       },
       "got": {
-        "slope": 3.0248529488523173,
-        "intercept": 38.46161005329094,
-        "r2": 0.9860641355606793
+        "slope": 3.024852948852316,
+        "intercept": 38.461610053290954,
+        "r2": 0.9860641355606787
       }
     },
     "normality_dataset.csv": {
@@ -531,150 +541,27 @@
           "expected": 0.8828095592153917,
           "got": 0.8828095592153918,
           "abs_error": 1.1102230246251565e-16,
-          "rel_error": 1.2576019516733388e-16,
+          "rel_error": 1.2576019516719141e-16,
           "abs_tol": 1e-06,
           "rel_tol": 0.001,
           "status": "PASS"
         }
       },
       "got": {
+        "n": 300,
+        "mean": 98.53876188515923,
+        "std": 14.65424390857384,
         "w_stat": 0.9971717915091215,
         "p_value": 0.8828095592153918
       }
     },
     "outliers_dataset.csv": {
       "type": "outliers",
-      "status": "PASS",
-      "checks": {
-        "mean": {
-          "expected": 102.19425714392698,
-          "got": 102.19425714392698,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "std": {
-          "expected": 12.546734779573288,
-          "got": 12.546734779573288,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "q1": {
-          "expected": 96.75304153128128,
-          "got": 96.75304153128128,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "q3": {
-          "expected": 104.15354925248045,
-          "got": 104.15354925248045,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "iqr": {
-          "expected": 7.400507721199162,
-          "got": 7.400507721199162,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "lower_iqr_bound": {
-          "expected": 85.65227994948253,
-          "got": 85.65227994948253,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "upper_iqr_bound": {
-          "expected": 115.25431083427918,
-          "got": 115.25431083427918,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "mad": {
-          "expected": 3.713705147216288,
-          "got": 3.713705147216288,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0.001,
-          "rel_tol": 1e-06,
-          "status": "PASS"
-        },
-        "zscore_outlier_indices": {
-          "expected": [
-            180,
-            181,
-            182,
-            183,
-            184
-          ],
-          "got": [
-            180,
-            181,
-            182,
-            183,
-            184
-          ],
-          "abs_error": null,
-          "rel_error": null,
-          "status": "PASS"
-        },
-        "iqr_outlier_indices": {
-          "expected": [
-            180,
-            181,
-            182,
-            183,
-            184
-          ],
-          "got": [
-            180,
-            181,
-            182,
-            183,
-            184
-          ],
-          "abs_error": null,
-          "rel_error": null,
-          "status": "PASS"
-        }
-      },
+      "status": "SKIPPED",
+      "reason": "Expected sem outlier_count/indices",
       "got": {
-        "mean": 102.19425714392698,
-        "std": 12.546734779573288,
-        "q1": 96.75304153128128,
-        "q3": 104.15354925248045,
-        "iqr": 7.400507721199162,
-        "lower_iqr_bound": 85.65227994948253,
-        "upper_iqr_bound": 115.25431083427918,
-        "mad": 3.713705147216288,
-        "zscore_threshold": 3.0,
-        "zscore_outlier_indices": [
-          180,
-          181,
-          182,
-          183,
-          184
-        ],
-        "iqr_outlier_indices": [
+        "outlier_count": 5,
+        "outlier_idx": [
           180,
           181,
           182,
@@ -687,15 +574,6 @@
       "type": "imr_chart",
       "status": "PASS",
       "checks": {
-        "n": {
-          "expected": 200,
-          "got": 200,
-          "abs_error": 0.0,
-          "rel_error": 0.0,
-          "abs_tol": 0,
-          "rel_tol": 0,
-          "status": "PASS"
-        },
         "mean": {
           "expected": 99.79614517413957,
           "got": 99.79614517413957,
@@ -705,18 +583,18 @@
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "mr_bar": {
-          "expected": 5.492954475766882,
-          "got": 5.492954475766882,
+        "sigma_est": {
+          "expected": 4.869640492701137,
+          "got": 4.869640492701137,
           "abs_error": 0.0,
           "rel_error": 0.0,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
         },
-        "sigma_est": {
-          "expected": 4.869640492701137,
-          "got": 4.869640492701137,
+        "mr_bar": {
+          "expected": 5.492954475766882,
+          "got": 5.492954475766882,
           "abs_error": 0.0,
           "rel_error": 0.0,
           "abs_tol": 0.001,
@@ -745,8 +623,8 @@
       "got": {
         "n": 200,
         "mean": 99.79614517413957,
-        "mr_bar": 5.492954475766882,
         "sigma_est": 4.869640492701137,
+        "mr_bar": 5.492954475766882,
         "ucl_x": 114.40506665224298,
         "lcl_x": 85.18722369603616
       }
@@ -827,7 +705,7 @@
           "expected": 0.04413794353989817,
           "got": 0.044053630506703814,
           "abs_error": 8.431303319435257e-05,
-          "rel_error": 0.0019102166170958652,
+          "rel_error": 0.001910216617052587,
           "abs_tol": 0.001,
           "rel_tol": 1e-06,
           "status": "PASS"
@@ -861,14 +739,14 @@
       "checks": {
         "numeric_columns": {
           "expected": [
-            "Revenue",
+            "Defects",
             "Profit",
-            "Defects"
+            "Revenue"
           ],
           "got": [
-            "Revenue",
+            "Defects",
             "Profit",
-            "Defects"
+            "Revenue"
           ],
           "abs_error": null,
           "rel_error": null,
@@ -1066,9 +944,9 @@
       },
       "got": {
         "numeric_columns": [
-          "Revenue",
+          "Defects",
           "Profit",
-          "Defects"
+          "Revenue"
         ],
         "descriptive": {
           "Revenue": {

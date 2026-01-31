@@ -142,7 +142,16 @@ def teste_t_pareado(grupo1: pd.Series, grupo2: pd.Series) -> dict:
     g2 = pares.iloc[:, 1]
 
     n = int(len(pares))
-    dif = (g1 - g2)
+    # diferença = After - Before (compatível com expected)
+    dif = (g2 - g1)
+
+    mean_dif = float(dif.mean()) if n else None
+    std_dif = float(dif.std(ddof=1)) if n > 1 else None
+
+    t_stat, p_value = (np.nan, np.nan)
+    if n >= 2:
+        t_stat, p_value = stats.ttest_rel(g2, g1)  # After, Before
+
 
     mean_dif = float(dif.mean()) if n else None
     std_dif = float(dif.std(ddof=1)) if n > 1 else None
