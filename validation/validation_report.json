@@ -1,9 +1,15 @@
 {
   "summary": {
-    "PASS": 26,
+    "PASS": 14,
     "FAIL": 0,
     "ERROR": 0,
-    "SKIPPED": 2
+    "SKIPPED": 0
+  },
+  "checks_summary": {
+    "PASS": 79,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIPPED": 0
   },
   "results": {
     "t_test_one_sample.csv": {
@@ -557,8 +563,37 @@
     },
     "outliers_dataset.csv": {
       "type": "outliers",
-      "status": "SKIPPED",
-      "reason": "Expected sem outlier_count/indices",
+      "status": "PASS",
+      "checks": {
+        "outlier_count": {
+          "expected": 5,
+          "got": 5,
+          "abs_error": 0.0,
+          "rel_error": 0.0,
+          "abs_tol": 0,
+          "rel_tol": 0,
+          "status": "PASS"
+        },
+        "outlier_idx": {
+          "expected": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "got": [
+            180,
+            181,
+            182,
+            183,
+            184
+          ],
+          "abs_error": null,
+          "rel_error": null,
+          "status": "PASS"
+        }
+      },
       "got": {
         "outlier_count": 5,
         "outlier_idx": [

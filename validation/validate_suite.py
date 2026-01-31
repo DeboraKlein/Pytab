@@ -707,4 +707,5 @@ def main():
     print(f"Relatório salvo em: {REPORT_PATH}")
     print("Resumo (por dataset):", summary)
     print("Resumo (por checks):", checks_summary)
-
+if __name__ == "__main__":
+    main()

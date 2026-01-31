@@ -117,30 +117,13 @@
     "outliers_dataset.csv": {
         "type": "outliers",
         "column": "Value",
-        "mean": 102.19425714392698,
-        "std": 12.546734779573288,
-        "q1": 96.75304153128128,
-        "q3": 104.15354925248045,
-        "iqr": 7.400507721199162,
-        "lower_iqr_bound": 85.65227994948253,
-        "upper_iqr_bound": 115.25431083427918,
-        "mad": 3.713705147216288,
-        "zscore_threshold": 3.0,
-        "zscore_outlier_indices": [
-            180,
-            181,
-            182,
-            183,
-            184
-        ],
-        "iqr_outlier_indices": [
-            180,
-            181,
-            182,
-            183,
-            184
-        ]
+        "method": "zscore",
+        "threshold": 3.0,
+        "outlier_count": 5,
+        "outlier_idx": [180, 181, 182, 183, 184]
     },
+
+    
     "imr_dataset.csv": {
         "type": "imr_chart",
         "column": "Value",
