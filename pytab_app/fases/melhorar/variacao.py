@@ -28,6 +28,6 @@ def calcular_variacao(serie: pd.Series):
 
 def grafico_variacao(antes, depois):
     fig, ax = plt.subplots(figsize=(8, 4))
-    ax.boxplot([antes, depois], labels=["Antes", "Depois"])
+    ax.boxplot([antes, depois], tick_labels=["Antes", "Depois"])
     ax.set_title("Redução de variação")
     return fig
