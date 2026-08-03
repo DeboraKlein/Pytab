@@ -1,19 +1,19 @@
 from pathlib import Path
 
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 from pytab.charts.theme import apply_pytab_theme
 from pytab.utils.app_utils import (
-    load_dataframe,
     check_column_names,
     detect_types,
-    show_column_warnings
+    load_dataframe,
+    show_column_warnings,
 )
-from pytab_app.fases.medir.medir import fase_medir
 from pytab_app.fases.analisar.analisar import fase_analisar
-from pytab_app.fases.melhorar.melhorar import fase_melhorar
 from pytab_app.fases.controlar.controlar import fase_controlar
+from pytab_app.fases.medir.medir import fase_medir
+from pytab_app.fases.melhorar.melhorar import fase_melhorar
 
 
 def _fase_definir() -> None:
@@ -39,6 +39,24 @@ para apoiar a construção do *baseline* do problema.
 def main() -> None:
     apply_pytab_theme()
 
+    # 1. TRECHO CSS DE IMPRESSÃO (Oculta menus do Streamlit ao gerar PDF pelo navegador)
+    st.markdown(
+        """
+        <style>
+        @media print {
+            #MainMenu, header, footer, .stButton, [data-testid="stSidebar"] {
+                display: none !important;
+            }
+            .main .block-container {
+                max-width: 100% !important;
+                padding: 1rem !important;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     st.set_page_config(
         page_title="PyTab - Open Statistical Toolkit",
         layout="wide",
@@ -57,6 +75,25 @@ def main() -> None:
             index=1,
         )
         st.markdown("---")
+
+        # 2. TRECHO BOTÃO DE IMPRESSÃO (Adicionado na barra lateral)
+        st.components.v1.html(
+            """
+            <button onclick="window.print()" style="
+                width: 100%;
+                background-color: #2E7D32;
+                color: white;
+                padding: 8px 12px;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                cursor: pointer;">
+                🖨️ Imprimir / Salvar PDF
+            </button>
+            """,
+            height=45,
+        )
+
         st.caption(
             "Carregue um arquivo de dados na área principal para começar a usar o PyTab."
         )
