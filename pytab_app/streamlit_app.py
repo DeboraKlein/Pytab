@@ -76,23 +76,7 @@ def main() -> None:
         )
         st.markdown("---")
 
-        # 2. TRECHO BOTÃO DE IMPRESSÃO (Adicionado na barra lateral)
-        st.components.v1.html(
-            """
-            <button onclick="window.print()" style="
-                width: 100%;
-                background-color: #2E7D32;
-                color: white;
-                padding: 8px 12px;
-                border: none;
-                border-radius: 4px;
-                font-weight: bold;
-                cursor: pointer;">
-                🖨️ Imprimir / Salvar PDF
-            </button>
-            """,
-            height=45,
-        )
+        
 
         st.caption(
             "Carregue um arquivo de dados na área principal para começar a usar o PyTab."
