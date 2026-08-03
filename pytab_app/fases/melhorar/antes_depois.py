@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 
 
 def analisar_antes_depois(df, col_data, col_valor, data_corte):
+    # Forçar conversão da coluna de data para o tipo Datetime antes de qualquer ordenação
+    df = df.copy() # Criamos uma cópia para não alterar o DataFrame original
+    df[col_data] = pd.to_datetime(df[col_data], errors='coerce') 
+    
     df_sorted = df.sort_values(col_data)
 
     antes = df_sorted[df_sorted[col_data] < pd.to_datetime(data_corte)][col_valor]

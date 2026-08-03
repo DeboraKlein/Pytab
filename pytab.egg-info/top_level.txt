@@ -1,5 +1,7 @@
+core
 docs
+notebooks
 pytab
 pytab_app
 temp_upload
-tests
+validation
