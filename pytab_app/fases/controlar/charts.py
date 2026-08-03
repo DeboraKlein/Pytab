@@ -8,8 +8,7 @@ from .regras import (
     regra_tendencia,
     regra_lado_media,
 )
-# Aplica o tema globalmente para o Matplotlib ao carregar o módulo
-apply_pytab_theme()
+
 
 
 # ======================================================================
