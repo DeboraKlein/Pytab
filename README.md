@@ -17,6 +17,12 @@
 # PyTab  
 Toolkit estatístico aberto, simples e poderoso — inspirado no Minitab.
 
+Você também pode usar o PyTab diretamente no seu navegador, sem necessidade de instalação local ou configuração de ambiente Python:
+
+**[Acesse a Aplicação Web do PyTab](https://pytab-dmaic.streamlit.app/)**
+
+Com a versão web no Streamlit, basta fazer o upload do seu arquivo de dados para gerar análises e gráficos instantaneamente.
+
 ---
 
 ## 1. Visão Geral
